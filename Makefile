@@ -3,7 +3,15 @@ all:
 run:
 	python -m enseigner
 
-deps:
-	pip3 install flask --user
+tests:
+	./run_tests.py
 
-.PHONY: run
+coverage:
+	python-coverage run --source=enseigner run_tests.py
+	python-coverage html
+	xdg-open htmlcov/index.html
+
+deps:
+	pip3 install flask werkzeug --user
+
+.PHONY: run tests
