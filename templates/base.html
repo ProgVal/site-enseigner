@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}ENSeigner{% endblock %}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css">
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+    <style src="{{ url_for('static', filename='style.css') }}"></style>
+    {% block headers %}
+    {% endblock %}
+</head>
+<body>
+<div class="container">
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="/">ENSeigner</a>
+            <!--<img src="http://enseigner.ens-lyon.fr/data/images/logo/logo_enseigner.jpg" alt="ENSeigner" />-->
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav">
+                <li {% block navbar_accueil_selection %}{% endblock %}><a href="{{ url_for('accueil') }}">Accueil</a></li>
+                <li {% block navbar_inscription_selection %}{% endblock %}><a href="{{ url_for('inscription') }}">Inscription</a></li>
+                <li {% block navbar_prochainesseances_selection %}{% endblock %}><a href="{{ url_for('prochaines_seances') }}">Prochaines séances</a></li>
+                <li {% block navbar_admin_active %}{% endblock %}><a href="{{ url_for('gestion_seances') }}">Gestion des séances</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>
+{% block body %}
+{% endblock %}
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+</body>
+</html>
