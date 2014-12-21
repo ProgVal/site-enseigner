@@ -11,6 +11,8 @@ class TutorTestCase(EnseignerTestCase):
         self.assertRaises(model.NotFound, model.Tutor.get, 'foobar')
         del model.Tutor._instances[t1.uid]
         self.assertEqual(t1.uid, model.Tutor.get('foo').uid)
+        self.assertEqual(t1.uid, model.Tutor.get(t1.uid).uid)
+        self.assertRaises(ValueError, model.Tutor.get, ('foo',))
 
     def testRepr(self):
         t1 = model.Tutor.create('foo', 'bar', False)

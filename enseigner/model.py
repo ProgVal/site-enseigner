@@ -71,13 +71,21 @@ class Tutor(object):
 
         
     @classmethod
-    def get(cls, tutor_email):
+    def get(cls, email_or_id):
         conn = get_conn()
         c = conn.cursor()
         try:
-            c.execute('''SELECT * FROM tutors 
-                         WHERE tutor_email=?''',
-                      (tutor_email,))
+            if isinstance(email_or_id, (str, unicode)):
+                c.execute('''SELECT * FROM tutors
+                             WHERE tutor_email=?''',
+                          (email_or_id,))
+            elif isinstance(email_or_id, int):
+                c.execute('''SELECT * FROM tutors
+                             WHERE tutor_id=?''',
+                          (email_or_id,))
+            else:
+                raise ValueError('email_or_id should be str or int, not %r' %
+                        email_or_id)
             r = c.fetchone()
         finally:
             c.close()
