@@ -11,6 +11,9 @@ coverage:
 	python-coverage html
 	xdg-open htmlcov/index.html
 
+db:
+	./make_db.py
+
 deps:
 	pip3 install flask werkzeug --user
 
