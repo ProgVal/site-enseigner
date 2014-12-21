@@ -70,7 +70,11 @@ def connexion():
         redirect_url = request.form.get('redirect_url', '')
         assert email and password, request.form
         tutor = model.Tutor.check_password(email, password)
-        session['tutor_id'] = tutor.uid
-        return redirect('/' + redirect_url)
+        if not tutor:
+            # TODO: Show an error message
+            return render_template('connexion.html', redirect_url=redirect_url)
+        else:
+            session['tutor_id'] = tutor.uid
+            return redirect('/' + redirect_url)
     else:
         raise AssertionError(request.method)
