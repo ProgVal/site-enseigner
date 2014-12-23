@@ -39,13 +39,16 @@ def _model(nb_keys):
                 assert self._instances[id_] is self
             else:
                 self._instances[id_] = self
-                for (key, value) in zip(self._fields, args):
-                    setattr(self, key, value)
+                self._attributes = dict(zip(self._fields, args))
 
         def __repr__(self):
             return '<enseigner.model.%s(%s)>' % (self.__class__.__name__,
                     ', '.join(['%s=%r' % (x, getattr(self, x))
                                for x in self._fields]))
+
+        def __getattr__(self, name):
+            if name in self._attributes:
+                return self._attributes[name]
 
         @classmethod
         def _check_exists(cls, cls2, key):
