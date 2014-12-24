@@ -109,6 +109,27 @@ class SingleKeyModel(_model(1)):
         finally:
             c.close()
         return cls(r, *args)
+
+    @classmethod
+    def _insert_many(cls, cols, l):
+        conn = get_conn()
+        c = conn.cursor()
+        r = []
+        try:
+            for args in l:
+                c.execute('INSERT INTO %s (%s) VALUES (%s);' % \
+                          (cls._table, cols, ', '.join('?'*len(args))),
+                          args)
+                r.append((c.lastrowid, args))
+        except sqlite3.IntegrityError:
+            conn.rollback()
+            raise Duplicate()
+        else:
+            conn.commit()
+        finally:
+            c.close()
+        return list(cls(x, *args) for (x, args) in r)
+
 DoubleKeyModel = _model(2)
 TripleKeyModel = _model(3)
 
@@ -226,14 +247,19 @@ class Session(SingleKeyModel):
     _create_table = '''CREATE TABLE sessions (
         session_id INTEGER PRIMARY KEY,
         session_date DATETIME,
-        session_managers TEXT
+        session_managers TEXT,
+        session_emailed_students BOOLEAN,
+        session_emailed_tutors BOOLEAN
         )'''
     _instances = weakref.WeakValueDictionary()
-    _fields = ('sid', 'date', 'managers')
+    _fields = ('sid', 'date', 'managers', 'emailed_students', 'emailed_tutors')
 
     @classmethod
-    def create(cls, *args):
-        return cls._insert_one('session_date, session_managers', args)
+    def create(cls, date, managers, emailed_students=False, emailed_tutors=False):
+        return cls._insert_one('''session_date, session_managers,
+                                  session_emailed_students,
+                                  session_emailed_tutors''',
+                               (date, managers, emailed_students, emailed_tutors))
 
     @classmethod
     def get(cls, sid):
@@ -355,6 +381,50 @@ class Subject(SingleKeyModel):
         finally:
             c.close()
         return cls._get_or_create(r)
+
+    @classmethod
+    def all_permanent(cls):
+        return cls._get_many('''SELECT * FROM subjects
+                                WHERE subject_is_exceptional=0''')
+
+@register
+class SessionSubject(SingleKeyModel):
+    _table = 'session_subjects'
+    _create_table = '''CREATE TABLE session_subjects (
+        ss_id INTEGER PRIMARY KEY,
+        session_id INTEGER,
+        subject_id INTEGER,
+        FOREIGN KEY (session_id) REFERENCES sessions(session_id),
+        FOREIGN KEY (subject_id) REFERENCES subjects(subject_id),
+        UNIQUE (session_id, subject_id)
+        )'''
+    _instances = weakref.WeakValueDictionary()
+    _fields = ('ssid', 'seid', 'suid')
+
+    @classmethod
+    def create_for_session(cls, session, subjects):
+        if isinstance(session, Session):
+            session = session.sid
+        else:
+            cls._check_exists(Session, session)
+        for subject in subjects:
+            if not isinstance(subject, Subject):
+                cls._check_exists(Subject, subject)
+        subjects = (s.sid if isinstance(s, Subject) else s for s in subjects)
+        l = list(map(lambda x:(session, x), subjects))
+        return cls._insert_many('session_id, subject_id', l)
+
+    @classmethod
+    def all_subjects_for_session(cls, session):
+        if isinstance(session, Session):
+            session = session.sid
+        else:
+            cls._check_exists(Session, session)
+        return Subject._get_many('''SELECT * FROM subjects
+                                    INNER JOIN session_subjects USING (subject_id)
+                                    WHERE session_id=?''',
+                                   (session,))
+
 
 @register
 class TutorRegistrationSubject(SingleKeyModel):
