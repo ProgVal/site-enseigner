@@ -3,13 +3,22 @@ import os
 import uuid
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask import abort
+from werkzeug.exceptions import HTTPException
+from werkzeug.wrappers import Response
 
 import model
+from config import config
 
 app = Flask('enseigner')
-salt = os.environ.get('ENSEIGNER_SECRET_SALT', '')
-assert len(salt) >= 20, 'Salt is not long enough'
+salt = config['password_salt']
+assert len(salt) >= 20, 'Secret key is not long enough'
 app.secret_key = salt
+
+class AdminOnly(HTTPException):
+    def get_response(self, environ=None):
+        html = render_template('erreur.html', admin_only=True,
+                error_message=u'Accès réservé aux responsables du soutien.')
+        return Response(html, mimetype='text/html')
 
 def require_admin(f):
     def newf(**kwargs):
@@ -25,9 +34,10 @@ def require_admin(f):
             if tutor.is_admin:
                 return f(**kwargs)
             else:
-                return render_template('error.html', message='Accès réservé aux responsables du soutien')
+                raise AdminOnly()
     newf.__name__ = f.__name__
     return newf
+
 
 # From http://flask.pocoo.org/snippets/3/
 @app.before_request
@@ -57,7 +67,14 @@ def prochaines_seances():
 @app.route('/gestion_seances/')
 @require_admin
 def gestion_seances():
-    return render_template('gestion_seances.html')
+    return render_template('gestion_seances/index.html',
+            sessions=model.Session.all())
+
+@app.route('/gestion_seances/nouvelle/')
+@require_admin
+def nouvelle_seance():
+    return render_template('gestion_seances/nouvelle.html',
+                           sessions=model.Session.all())
 
 @app.route('/connexion/', methods=['GET', 'POST'])
 def connexion():

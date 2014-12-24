@@ -4,6 +4,8 @@ import hashlib
 import sqlite3
 import weakref
 
+from config import config
+
 class NotFound(Exception):
     pass
 class ForeignKeyNotMapped(Exception):
@@ -20,7 +22,7 @@ def register(cls):
 
 
 def password_hash(tutor_email, password):
-    salt = os.environ.get('ENSEIGNER_PASSWORD_SALT', '')
+    salt = config['password_salt']
     assert len(salt) >= 20, 'Salt is not long enough'
     return hashlib.sha512('%s|%s|%s' % (salt, tutor_email, password)).hexdigest()
 
@@ -356,7 +358,7 @@ class Subject(SingleKeyModel):
     _table = 'subjects'
     _create_table = '''CREATE TABLE subjects (
         subject_id INTEGER PRIMARY KEY,
-        subject_name TEXT UNIQUE,
+        subject_name TEXT,
         subject_is_exceptional BOOLEAN
         )'''
     _instances = weakref.WeakValueDictionary()
@@ -386,6 +388,10 @@ class Subject(SingleKeyModel):
     def all_permanent(cls):
         return cls._get_many('''SELECT * FROM subjects
                                 WHERE subject_is_exceptional=0''')
+
+    @classmethod
+    def all(cls):
+        return cls._get_many('''SELECT * FROM subjects''')
 
 @register
 class SessionSubject(SingleKeyModel):
@@ -421,8 +427,8 @@ class SessionSubject(SingleKeyModel):
         else:
             cls._check_exists(Session, session)
         return Subject._get_many('''SELECT * FROM subjects
-                                    INNER JOIN session_subjects USING (subject_id)
-                                    WHERE session_id=?''',
+                                    LEFT JOIN session_subjects USING (subject_id)
+                                    WHERE session_id IS NULL OR session_id=?''',
                                    (session,))
 
 

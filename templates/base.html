@@ -12,6 +12,7 @@
       <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
     <![endif]-->
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <script type="text/javascript" src="//code.jquery.com/jquery-2.1.1.min.js"></script>
     {% block headers %}
     {% endblock %}
 </head>
@@ -28,7 +29,7 @@
                 <li {% block navbar_accueil_selection %}{% endblock %}><a href="{{ url_for('accueil') }}">Accueil</a></li>
                 <li {% block navbar_inscription_selection %}{% endblock %}><a href="{{ url_for('inscription') }}">Inscription</a></li>
                 <li {% block navbar_prochainesseances_selection %}{% endblock %}><a href="{{ url_for('prochaines_seances') }}">Prochaines séances</a></li>
-                <li {% block navbar_admin_selection %}{% endblock %}><a href="{{ url_for('gestion_seances') }}">Gestion des séances</a></li>
+                <li {% block navbar_gestionseances_selection %}{% endblock %}><a href="{{ url_for('gestion_seances') }}">Gestion des séances</a></li>
             </ul>
         </div>
     </div>
@@ -36,7 +37,9 @@
 {% block body %}
 {% endblock %}
 </div>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js"></script>
+{% block footer_scripts %}
+{% endblock %}
 </body>
 </html>

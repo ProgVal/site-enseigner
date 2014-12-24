@@ -3,8 +3,11 @@ all:
 run:
 	python -m enseigner
 
+debugrun:
+	ENSEIGNER_CONFIG=example_config.json python -m enseigner
+
 tests:
-	./run_tests.py
+	ENSEIGNER_CONFIG=example_config.json ./run_tests.py
 
 coverage:
 	python-coverage run --source=enseigner run_tests.py

@@ -149,3 +149,29 @@ class MiscTestCase(EnseignerTestCase):
 
     def testSubject(self):
         self.assertRaises(ValueError, model.Subject.get, 'foo')
+        sub1 = model.Subject.create('foo', False)
+        sub2 = model.Subject.create('bar', True)
+        sub3 = model.Subject.create('baz', False)
+        self.assertEqual(set(model.Subject.all_permanent()), {sub1, sub3})
+        self.assertEqual(set(model.Subject.all()), {sub1, sub2, sub3})
+
+    def testSessionSubject(self):
+        s1 = model.Session.create('foo', 'bar')
+        s2 = model.Session.create('foo2', 'bar2')
+        s3 = model.Session.create('foo3', 'bar3')
+        sub1 = model.Subject.create('foo', True)
+        sub2 = model.Subject.create('bar', True)
+        sub3 = model.Subject.create('baz', True)
+        sub4 = model.Subject.create('qux', False)
+        sub5 = model.Subject.create('quux', False)
+        ss1 = model.SessionSubject.create_for_session(s1, [sub1, sub3])
+        self.assertRaises(model.Duplicate,
+                model.SessionSubject.create_for_session, s2, [sub2, sub2])
+        ss2 = model.SessionSubject.create_for_session(s2, [sub2, sub3])
+        ss2 = model.SessionSubject.create_for_session(s3.sid, [sub2.sid, sub3.sid])
+        self.assertEqual(set(model.SessionSubject.all_subjects_for_session(s1)),
+                {sub1, sub3, sub4, sub5})
+        self.assertEqual(set(model.SessionSubject.all_subjects_for_session(s2.sid)),
+                {sub2, sub3, sub4, sub5})
+        self.assertEqual(set(model.SessionSubject.all_subjects_for_session(s3)),
+                {sub2, sub3, sub4, sub5})

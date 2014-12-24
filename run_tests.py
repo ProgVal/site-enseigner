@@ -2,8 +2,6 @@
 import os
 import unittest
 
-os.environ['ENSEIGNER_SECRET_SALT'] = 'f' * 20
-
 def main(): # pragma: no cover
     testsuite = unittest.TestLoader().discover('tests/')
     results = unittest.TextTestRunner(verbosity=1).run(testsuite)
