@@ -20,7 +20,7 @@ class ModelTestCase(EnseignerTestCase):
                 "<enseigner.model.Tutor(uid=1, email='foo', "
                 "password_hash='%s', phone_number=None, is_admin=False, "
                 "is_active=True, comment=None)>" %
-                model.password_hash('foo', 'bar'))
+                model.password_hash(t1.uid, 'bar'))
 
 class TutorTestCase(EnseignerTestCase):
     def testGetTutors(self):

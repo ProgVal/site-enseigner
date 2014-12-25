@@ -21,10 +21,10 @@ def register(cls):
     return cls
 
 
-def password_hash(tutor_email, password):
+def password_hash(tutor_id, password):
     salt = config['password_salt']
     assert len(salt) >= 20, 'Salt is not long enough'
-    return hashlib.sha512('%s|%s|%s' % (salt, tutor_email, password)).hexdigest()
+    return hashlib.sha512('%s|%d|%s' % (salt, tutor_id, password)).hexdigest()
 
 
 def get_conn(): # pragma: no cover
@@ -152,10 +152,19 @@ class Tutor(SingleKeyModel):
 
     @classmethod
     def create(cls, email, password, phone_number=None, is_admin=False, is_active=True, comment=None):
-        hash_ = password_hash(email, password)
-        return cls._insert_one('''tutor_email, tutor_password_hash, tutor_phone_number,
-                                  tutor_is_admin, tutor_is_active, tutor_comment''',
-                              (email, hash_, phone_number, is_admin, is_active, comment))
+        t = cls._insert_one('''tutor_email, tutor_password_hash, tutor_phone_number,
+                               tutor_is_admin, tutor_is_active, tutor_comment''',
+                            (email, None, phone_number, is_admin, is_active, comment))
+        t.password_hash = password_hash(t.uid, password)
+        conn = get_conn()
+        c = conn.cursor()
+        try:
+            c.execute('''UPDATE tutors SET tutor_password_hash=?
+                         WHERE tutor_id=?''', (t.password_hash, t.uid))
+        finally:
+            c.close()
+
+        return t
 
         
     @classmethod
@@ -188,10 +197,16 @@ class Tutor(SingleKeyModel):
     def check_password(cls, tutor_email, password):
         conn = get_conn()
         c = conn.cursor()
+        c.execute('SELECT tutor_id FROM tutors WHERE tutor_email=?',
+                (tutor_email,))
+        r = c.fetchone()
+        if not r:
+            return None
+        tutor_id = r[0]
         try:
             c.execute('''SELECT * FROM tutors 
-                         WHERE tutor_email=? AND tutor_password_hash=?''',
-                      (tutor_email, password_hash(tutor_email, password)))
+                         WHERE tutor_id=? AND tutor_password_hash=?''',
+                      (tutor_id, password_hash(tutor_id, password)))
             r = c.fetchone()
         finally:
             c.close()
