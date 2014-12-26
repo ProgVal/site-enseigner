@@ -1,0 +1,8 @@
+{
+    "backup": {
+        "tutors": "tutors_backup.csv",
+        "students": "students_backup.csv"
+    },
+    "password_salt": "ffffffffffffffffffffffffffffffffffff",
+    "secret_key": "ooooooooooooooooooooooooooooooooo"
+}
