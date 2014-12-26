@@ -415,12 +415,13 @@ class SessionSubject(SingleKeyModel):
         ss_id INTEGER PRIMARY KEY,
         session_id INTEGER,
         subject_id INTEGER,
+        ss_is_open INTEGER,
         FOREIGN KEY (session_id) REFERENCES sessions(session_id),
         FOREIGN KEY (subject_id) REFERENCES subjects(subject_id),
         UNIQUE (session_id, subject_id)
         )'''
     _instances = weakref.WeakValueDictionary()
-    _fields = ('ssid', 'seid', 'suid')
+    _fields = ('ssid', 'seid', 'suid', 'is_open')
 
     @classmethod
     def create_for_session(cls, session, subjects):
@@ -432,8 +433,8 @@ class SessionSubject(SingleKeyModel):
             if not isinstance(subject, Subject):
                 cls._check_exists(Subject, subject)
         subjects = (s.sid if isinstance(s, Subject) else s for s in subjects)
-        l = list(map(lambda x:(session, x), subjects))
-        return cls._insert_many('session_id, subject_id', l)
+        l = list(map(lambda x:(session, x, True), subjects))
+        return cls._insert_many('session_id, subject_id, ss_is_open', l)
 
     @classmethod
     def all_subjects_for_session(cls, session):
