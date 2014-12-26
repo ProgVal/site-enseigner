@@ -349,7 +349,7 @@ class TutorRegistration(SingleKeyModel):
         return cls._get_or_create(r)
 
     @classmethod
-    def find(cls, session, tutor):
+    def all_for_session_tutor(cls, session, tutor):
         if isinstance(session, Session):
             session = session.sid
         else:
@@ -358,15 +358,9 @@ class TutorRegistration(SingleKeyModel):
             tutor = tutor.uid
         else:
             cls._check_exists(Tutor, tutor)
-        r = cls._get_many('''SELECT * FROM tutor_registrations
-                             WHERE treg_session_id=? AND treg_tutor_id=?''',
-                          (session, tutor))
-        r = list(r)
-        if not r:
-            raise NotFound()
-        else:
-            assert len(r) == 1
-            return r[0]
+        return cls._get_many('''SELECT * FROM tutor_registrations
+                                WHERE treg_session_id=? AND treg_tutor_id=?''',
+                             (session, tutor))
 
 @register
 class Subject(SingleKeyModel):
