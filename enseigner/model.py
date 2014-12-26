@@ -484,6 +484,36 @@ class TutorRegistrationSubject(SingleKeyModel):
         return cls._get_many('''SELECT * FROM tutor_registrations_subject
                                 WHERE tregs_treg_id=?''', (treg,))
 
+    @classmethod
+    def set_for_treg(cls, treg, l):
+        if isinstance(treg, TutorRegistration):
+            treg = treg.trid
+        else:
+            cls._check_exists(TutorRegistration, treg)
+        assert isinstance(treg, int), treg
+        assert hasattr(l, '__iter__'), l
+        conn = get_conn()
+        c = conn.cursor()
+        try:
+            c.execute('''DELETE FROM tutor_registrations_subject
+                         WHERE tregs_treg_id=?''', (treg,))
+            for (subject, preference) in l:
+                if isinstance(subject, Subject):
+                    subject = subject.sid
+                else:
+                    cls._check_exists(Subject, subject)
+                c.execute('''INSERT INTO tutor_registrations_subject
+                             (tregs_treg_id, tregs_subject_id, tregs_preference)
+                             VALUES (?, ?, ?);''',
+                          (treg, subject, preference))
+        except sqlite3.IntegrityError:
+            conn.rollback()
+            raise Duplicate()
+        else:
+            conn.commit()
+        finally:
+            c.close()
+
 @register
 class StudentRegistration(SingleKeyModel):
     _table = 'student_registrations'

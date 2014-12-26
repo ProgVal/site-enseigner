@@ -106,8 +106,15 @@ class TregTestCase(EnseignerTestCase):
         ts3 = model.TutorRegistrationSubject.create(tr2, sub2.sid, 3)
         self.assertEqual(set(model.TutorRegistrationSubject.all_of_treg(tr1)),
                 {ts1, ts2})
+        self.assertEqual(
+                set(x.sid for x in model.TutorRegistrationSubject.all_of_treg(tr1)),
+                {sub2.sid, sub3.sid})
         self.assertEqual(set(model.TutorRegistrationSubject.all_of_treg(tr2)),
                 {ts3})
+        model.TutorRegistrationSubject.set_for_treg(tr1, [(sub1, 1)])
+        self.assertEqual(
+                set(x.sid for x in model.TutorRegistrationSubject.all_of_treg(tr1)),
+                {sub1.sid})
 
 class SregTestCase(EnseignerTestCase):
     def testGetFindAll(self):
