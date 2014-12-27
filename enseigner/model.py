@@ -267,17 +267,22 @@ class Session(SingleKeyModel):
         session_date DATETIME,
         session_managers TEXT,
         session_emailed_students BOOLEAN,
-        session_emailed_tutors BOOLEAN
+        session_emailed_tutors BOOLEAN,
+        session_is_open BOOLEAN
         )'''
     _instances = weakref.WeakValueDictionary()
-    _fields = ('sid', 'date', 'managers', 'emailed_students', 'emailed_tutors')
+    _fields = ('sid', 'date', 'managers',
+            'emailed_students', 'emailed_tutors', 'is_open')
 
     @classmethod
-    def create(cls, date, managers, emailed_students=False, emailed_tutors=False):
+    def create(cls, date, managers,
+            emailed_students=False, emailed_tutors=False, is_open=True):
         return cls._insert_one('''session_date, session_managers,
                                   session_emailed_students,
-                                  session_emailed_tutors''',
-                               (date, managers, emailed_students, emailed_tutors))
+                                  session_emailed_tutors,
+                                  session_is_open''',
+                               (date, managers, emailed_students, emailed_tutors,
+                                is_open))
 
     @classmethod
     def get(cls, sid):
