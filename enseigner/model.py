@@ -164,6 +164,7 @@ class Tutor(SingleKeyModel):
         try:
             c.execute('''UPDATE tutors SET tutor_password_hash=?
                          WHERE tutor_id=?''', (t.password_hash, t.uid))
+            conn.commit()
         finally:
             c.close()
 
@@ -382,6 +383,7 @@ class TutorRegistration(SingleKeyModel):
                         treg_group_size=?, treg_comment=?
                         WHERE treg_id=?''',
                      (group_size, comment, self.trid,))
+        conn.commit()
         self.group_size = group_size
         self.comment = comment
 
@@ -628,6 +630,7 @@ class StudentRegistration(SingleKeyModel):
                         subject_id=?, sreg_friends=?, sreg_comment=?
                         WHERE sreg_id=?''',
                      (subject, friends, comment, self.srid,))
+        conn.commit()
         self.subject = subject
         self.friends = friends
         self.comment = comment
