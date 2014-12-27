@@ -442,14 +442,18 @@ class Subject(SingleKeyModel):
     _create_table = '''CREATE TABLE subjects (
         subject_id INTEGER PRIMARY KEY,
         subject_name TEXT,
-        subject_is_exceptional BOOLEAN
+        subject_is_exceptional BOOLEAN,
+        subject_color TEXT
         )'''
     _instances = weakref.WeakValueDictionary()
-    _fields = ('sid', 'name', 'is_exceptional')
+    _fields = ('sid', 'name', 'color', 'is_exceptional')
 
     @classmethod
-    def create(cls, *args):
-        return cls._insert_one('subject_name, subject_is_exceptional', args)
+    def create(cls, name, is_exceptional=False, color='#000000'):
+        return cls._insert_one('''subject_name,
+                                  subject_is_exceptional,
+                                  subject_color''',
+                               (name, is_exceptional, color))
 
     @classmethod
     def get(cls, sid):
