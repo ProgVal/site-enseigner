@@ -32,12 +32,12 @@ class ControllerTestCase(EnseignerTestCase):
         self.assertRaises(controller.WrongHash,
                 controller.get_tutor_form_data, str(s1.sid), str(t1.uid), '')
         controller.set_tutor_form_data(str(s1.sid), str(t1.uid), h, [str(sub1.sid), str(sub4.sid)], 3, 'qux')
-        (email, name, subjects, group_size, comment) = controller.get_tutor_form_data(str(s1.sid), str(t1.uid), h)
-        self.assertEqual(email, 'foo')
-        self.assertEqual(name, 'bar')
-        self.assertEqual({x.name for x in subjects}, {'foo', 'qux'})
-        self.assertEqual(group_size, 3)
-        self.assertEqual(comment, 'qux')
+        d = controller.get_tutor_form_data(str(s1.sid), str(t1.uid), h)
+        self.assertEqual(d.email, 'foo')
+        self.assertEqual(d.name, 'bar')
+        self.assertEqual({x.name for x in d.subjects}, {'foo', 'qux'})
+        self.assertEqual(d.group_size, 3)
+        self.assertEqual(d.comment, 'qux')
         self.assertRaises(controller.WrongHash,
                 controller.get_tutor_form_data, str(s1.sid), str(t1.uid), '')
 

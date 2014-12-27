@@ -1,5 +1,6 @@
 import hashlib
 import datetime
+import collections
 
 import model
 from config import config
@@ -33,6 +34,8 @@ def create_session(date, exceptional_subjects_names):
     model.SessionSubject.create_for_session(session, subjects)
     return session
 
+TutorForm = collections.namedtuple('TutorForm',
+        'email name subjects group_size comment')
 @check_hash('tutor')
 def get_tutor_form_data(session, tutor):
     tutor = model.Tutor.get(int(tutor))
@@ -46,7 +49,7 @@ def get_tutor_form_data(session, tutor):
         subjects = set()
         group_size = 0
         comment = ''
-    return (tutor.email, tutor.name, subjects, group_size, comment)
+    return TutorForm(tutor.email, tutor.name, subjects, group_size, comment)
 
 @check_hash('tutor')
 def set_tutor_form_data(session, tutor, subjects, group_size, comment):
@@ -58,3 +61,10 @@ def set_tutor_form_data(session, tutor, subjects, group_size, comment):
     # TODO: handle multiple preferences
     model.TutorRegistrationSubject.set_for_treg(treg,
             ((model.Subject.get(int(x)), 1) for x in subjects))
+
+@check_hash('student')
+def get_student_form_data(session, student):
+    try:
+        return model.StudentRegistration.find(int(session), int(student))
+    except model.NotFound:
+        return None
