@@ -10,7 +10,7 @@ tests:
 	ENSEIGNER_CONFIG=example_config.json ./run_tests.py
 
 coverage:
-	python-coverage run --source=enseigner run_tests.py
+	ENSEIGNER_CONFIG=example_config.json python-coverage run --source=enseigner run_tests.py
 	python-coverage html
 	xdg-open htmlcov/index.html
 
