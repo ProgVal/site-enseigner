@@ -1,6 +1,7 @@
 import unittest
 
 import enseigner.model as model
+import enseigner.emails as emails
 
 class EnseignerTestCase(unittest.TestCase):
     def setUp(self):
@@ -11,6 +12,7 @@ class EnseignerTestCase(unittest.TestCase):
                 table._instances = model.weakref.WeakValueDictionary()
                 self.db.execute(table._create_table)
         (self._get_conn, model.get_conn) = (model.get_conn, lambda: self.db)
+        emails.MockServer.queue = []
     def tearDown(self):
         super(EnseignerTestCase, self).setUp()
         model.get_conn = self._get_conn

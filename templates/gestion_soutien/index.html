@@ -28,14 +28,14 @@
                             {{ session.emailed_tutors }}
                                 {{ session.nb_tutors }}
                             {% else %}
-                                <a href="{{ url_for('envoi_mail_tuteurs') }}">mail non envoyé</a>
+                                <a href="{{ url_for('envoi_mail_tuteurs', session=session.sid) }}">mail non envoyé</a>
                             {% endif %}
                         </td>
                         <td>
                             {% if session.emailed_tutors %}
                                 {{ session.nb_students }}
                             {% else %}
-                                <a href="{{ url_for('envoi_mail_eleves')}} ">mail non envoyé</a>
+                                <a href="{{ url_for('envoi_mail_eleves', session=session.sid) }} ">mail non envoyé</a>
                             {% endif %}
                         </td>
                         <td>{{ session.managers|map(attribute='email')|join(', ')|e }}</td>

@@ -4,5 +4,11 @@
         "students": "students_backup.csv"
     },
     "password_salt": "ffffffffffffffffffffffffffffffffffff",
-    "secret_key": "ooooooooooooooooooooooooooooooooo"
+    "secret_key": "ooooooooooooooooooooooooooooooooo",
+    "email": {
+        "from": "enseignersoutien@foo",
+        "server": "smtp.gmail.com:587",
+        "username": "enseignersoutien",
+        "password": "foo"
+    }
 }

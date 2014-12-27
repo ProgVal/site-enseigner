@@ -15,6 +15,15 @@ salt = config['password_salt']
 assert len(salt) >= 20, 'Secret key is not long enough'
 app.secret_key = salt
 
+STUDENTS_EMAIL_SUBJECT = u'ENSeigner — Inscription à la séance du %(date)s'
+STUDENTS_EMAIL_CONTENT = u'''Bonjour $nom_eleve,
+
+Voici, comme chaque semaine, le lien vers le formulaire pour t’inscrire à
+la séance de samedi prochain : $lien_formulaire_eleve
+
+Cordialement,
+Les reponsables du soutien'''
+
 class AdminOnly(HTTPException):
     def get_response(self, environ=None):
         html = render_template('erreur.html', admin_only=True,
@@ -95,10 +104,20 @@ def nouvelle_seance():
 
 @app.route('/gestion_soutien/envoi_mail_seance/tuteurs/', methods=['GET', 'POST'])
 def envoi_mail_tuteurs():
-    pass
+    if request.method == 'GET':
+        return render_template('gestion_soutien/envoi_mail.html',
+                               recipient='Tuteurs et tutrices',
+                               sender=config['email']['from'])
 @app.route('/gestion_soutien/envoi_mail_seance/eleves/', methods=['GET', 'POST'])
 def envoi_mail_eleves():
-    pass
+    session = model.Session.get(int(request.args['session']))
+    if request.method == 'GET':
+        subj_repl = {'date': session.date.strftime('%d/%m/%Y')}
+        return render_template('gestion_soutien/envoi_mail.html',
+                               recipient=u'Élèves',
+                               sender=config['email']['from'],
+                               subject=STUDENTS_EMAIL_SUBJECT % subj_repl,
+                               content=STUDENTS_EMAIL_CONTENT)
 
 @app.route('/connexion/', methods=['GET', 'POST'])
 def connexion():

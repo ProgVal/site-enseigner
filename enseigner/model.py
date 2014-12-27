@@ -3,6 +3,7 @@ import os
 import hashlib
 import sqlite3
 import weakref
+import datetime
 
 from config import config
 
@@ -290,6 +291,11 @@ class Session(SingleKeyModel):
     _fields = ('sid', 'date', 'managers',
             'session_form_comment_students', 'session_form_comment_tutors',
             'emailed_students', 'emailed_tutors', 'is_open')
+
+    @property
+    def date(self):
+        return datetime.datetime.strptime(self._attributes['date'],
+                '%Y-%m-%d %H:%M:%S')
 
     @classmethod
     def create(cls, date, managers,
