@@ -71,7 +71,7 @@ def _model(nb_keys):
             else:
                 instance = cls(*data)
                 cls._instances[id_] = instance
-                return instance 
+                return instance
 
         @classmethod
         def _fetch_many(cls, request, args=()):
@@ -170,7 +170,7 @@ class Tutor(SingleKeyModel):
 
         return t
 
-        
+
     @classmethod
     def get(cls, email_or_id):
         conn = get_conn()
@@ -196,6 +196,11 @@ class Tutor(SingleKeyModel):
     def all(cls):
         return cls._get_many('''SELECT * FROM tutors''')
 
+    @classmethod
+    def all_active(cls):
+        return cls._get_many('''SELECT * FROM students
+                                WHERE student_is_active=1''')
+
 
     @classmethod
     def check_password(cls, tutor_email, password):
@@ -208,7 +213,7 @@ class Tutor(SingleKeyModel):
             return None
         tutor_id = r[0]
         try:
-            c.execute('''SELECT * FROM tutors 
+            c.execute('''SELECT * FROM tutors
                          WHERE tutor_id=? AND tutor_password_hash=?''',
                       (tutor_id, password_hash(tutor_id, password)))
             r = c.fetchone()
@@ -241,7 +246,7 @@ class Student(SingleKeyModel):
                                   student_is_active, student_blacklisted, student_comment''',
                                (emails, name, phone_number, is_active, blacklisted, comment))
 
-        
+
     @classmethod
     def get(cls, uid):
         conn = get_conn()
@@ -262,6 +267,12 @@ class Student(SingleKeyModel):
     def all(cls):
         return cls._get_many('''SELECT * FROM students''')
 
+    @classmethod
+    def all_active_not_blacklisted(cls):
+        return cls._get_many('''SELECT * FROM students
+                                WHERE student_is_active=1
+                                AND student_blacklisted=0''')
+
 @register
 class Session(SingleKeyModel):
     _table = 'sessions'
@@ -277,6 +288,7 @@ class Session(SingleKeyModel):
         )'''
     _instances = weakref.WeakValueDictionary()
     _fields = ('sid', 'date', 'managers',
+            'session_form_comment_students', 'session_form_comment_tutors',
             'emailed_students', 'emailed_tutors', 'is_open')
 
     @classmethod
@@ -312,19 +324,43 @@ class Session(SingleKeyModel):
     def all(cls):
         return cls._get_many('''SELECT * FROM sessions''')
 
+    @property
+    def nb_students(self):
+        conn = get_conn()
+        c = conn.cursor()
+        try:
+            c.execute('''SELECT COUNT() FROM student_registrations
+                         WHERE session_id=?''', (self.sid,))
+            r = c.fetchone()[0]
+        finally:
+            c.close()
+        return r
+
+    @property
+    def nb_tutors(self):
+        conn = get_conn()
+        c = conn.cursor()
+        try:
+            c.execute('''SELECT COUNT() FROM tutor_registrations
+                         WHERE session_id=?''', (self.sid,))
+            r = c.fetchone()[0]
+        finally:
+            c.close()
+        return r
+
 
 @register
 class TutorRegistration(SingleKeyModel):
     _table = 'tutor_registrations'
     _create_table = '''CREATE TABLE tutor_registrations (
         treg_id INTEGER PRIMARY KEY,
-        treg_session_id INTEGER,
+        session_id INTEGER,
         treg_tutor_id INTEGER,
         treg_group_size INTEGER,
         treg_comment TEXT,
-        FOREIGN KEY (treg_session_id) REFERENCES sessions(session_id),
+        FOREIGN KEY (session_id) REFERENCES sessions(session_id),
         FOREIGN KEY (treg_tutor_id) REFERENCES tutors(tutor_id),
-        UNIQUE (treg_session_id, treg_tutor_id)
+        UNIQUE (session_id, treg_tutor_id)
         )'''
     _instances = weakref.WeakValueDictionary()
     _fields = ('trid', 'sid', 'uid', 'group_size', 'comment')
@@ -339,7 +375,7 @@ class TutorRegistration(SingleKeyModel):
             tutor = tutor.uid
         else:
             cls._check_exists(Tutor, tutor)
-        return cls._insert_one('''treg_session_id, treg_tutor_id,
+        return cls._insert_one('''session_id, treg_tutor_id,
                                   treg_group_size, treg_comment''',
                                (session, tutor) + args)
 
@@ -349,7 +385,7 @@ class TutorRegistration(SingleKeyModel):
             session = session.sid
         assert isinstance(session, int), session
         return cls._get_many('''SELECT * FROM tutor_registrations
-                                WHERE treg_session_id=?''', (session,))
+                                WHERE session_id=?''', (session,))
 
     @classmethod
     def get(cls, trid):
@@ -375,7 +411,7 @@ class TutorRegistration(SingleKeyModel):
         else:
             cls._check_exists(Tutor, tutor)
         r = cls._get_many('''SELECT * FROM tutor_registrations
-                             WHERE treg_session_id=? AND treg_tutor_id=?''',
+                             WHERE session_id=? AND treg_tutor_id=?''',
                           (session, tutor))
         r = list(r)
         if not r:
@@ -408,7 +444,7 @@ class Subject(SingleKeyModel):
     @classmethod
     def create(cls, *args):
         return cls._insert_one('subject_name, subject_is_exceptional', args)
-        
+
     @classmethod
     def get(cls, sid):
         conn = get_conn()
@@ -577,7 +613,7 @@ class StudentRegistration(SingleKeyModel):
         return cls._insert_one('''session_id, student_id,
                                   subject_id, sreg_friends, sreg_comment''',
                                (session, student, subject) + args)
-        
+
     @classmethod
     def get(cls, sid):
         conn = get_conn()
@@ -641,3 +677,46 @@ class StudentRegistration(SingleKeyModel):
         self.subject = subject
         self.friends = friends
         self.comment = comment
+
+@register
+class Mail(SingleKeyModel):
+    _table = 'mails'
+    _create_table = '''CREATE TABLE queued_mails (
+        mail_id INTEGER PRIMARY KEY,
+        mail_recipient TEXT,
+        mail_content TEXT,
+        mail_sent BOOLEAN
+        )'''
+    _instances = weakref.WeakValueDictionary()
+    _fields = ('mid', 'recipient', 'content', 'sent')
+
+    @classmethod
+    def create(cls, recipient content, sent=False):
+        return cls._insert_one('''mail_recipient, mail_content, mail_sent''',
+                               (recipient, content, sent))
+
+
+    @classmethod
+    def get(cls, mid):
+        conn = get_conn()
+        c = conn.cursor()
+        try:
+            c.execute('''SELECT * FROM mails
+                         WHERE mail_id=?''',
+                      (mid,))
+            r = c.fetchone()
+        finally:
+            c.close()
+        return cls._get_or_create(r)
+
+    @classmethod
+    def all_unsent(cls):
+        return cls._get_many('''SELECT * FROM mails WHERE mail_sent=0''')
+
+    def set_sent(self):
+        conn = get_conn()
+        conn.execute('''UPDATE mails SET mail_sent=1
+                        WHERE mail_id=?''',
+                     (self.mid,))
+        conn.commit()
+        self.sent = True
