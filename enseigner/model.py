@@ -691,7 +691,7 @@ class Mail(SingleKeyModel):
     _fields = ('mid', 'recipient', 'content', 'sent')
 
     @classmethod
-    def create(cls, recipient content, sent=False):
+    def create(cls, recipient, content, sent=False):
         return cls._insert_one('''mail_recipient, mail_content, mail_sent''',
                                (recipient, content, sent))
 
