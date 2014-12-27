@@ -21,8 +21,8 @@ class ControllerTestCase(EnseignerTestCase):
         sub1 = model.Subject.create('foo', False)
         sub2 = model.Subject.create('bar', True)
         sub3 = model.Subject.create('baz', False)
-        t1 = model.Tutor.create('foo', 'bar', False)
-        t2 = model.Tutor.create('foo2', 'bar', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
+        t2 = model.Tutor.create('foo2', '', 'bar', False)
         s1 = controller.create_session('26/12/2014 20:50', ['qux', 'quux'])
         s2 = controller.create_session('26/12/2014 20:50', ['corge'])
         sub4 = [x for x in model.SessionSubject.all_subjects_for_session(s1) if x.name == 'qux'][0]

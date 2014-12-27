@@ -141,6 +141,7 @@ class Tutor(SingleKeyModel):
     _create_table = '''CREATE TABLE tutors (
         tutor_id INTEGER PRIMARY KEY,
         tutor_email TEXT UNIQUE,
+        tutor_name TEXT,
         tutor_password_hash TEXT,
         tutor_phone_number TEXT,
         tutor_is_admin BOOLEAN,
@@ -148,13 +149,13 @@ class Tutor(SingleKeyModel):
         tutor_comment TEXT
         )'''
     _instances = weakref.WeakValueDictionary()
-    _fields = ('uid', 'email', 'password_hash', 'phone_number', 'is_admin', 'is_active', 'comment')
+    _fields = ('uid', 'email', 'name', 'password_hash', 'phone_number', 'is_admin', 'is_active', 'comment')
 
     @classmethod
-    def create(cls, email, password, phone_number=None, is_admin=False, is_active=True, comment=None):
-        t = cls._insert_one('''tutor_email, tutor_password_hash, tutor_phone_number,
+    def create(cls, email, name, password, phone_number=None, is_admin=False, is_active=True, comment=None):
+        t = cls._insert_one('''tutor_email, tutor_name, tutor_password_hash, tutor_phone_number,
                                tutor_is_admin, tutor_is_active, tutor_comment''',
-                            (email, None, phone_number, is_admin, is_active, comment))
+                            (email, name, None, phone_number, is_admin, is_active, comment))
         t.password_hash = password_hash(t.uid, password)
         conn = get_conn()
         c = conn.cursor()

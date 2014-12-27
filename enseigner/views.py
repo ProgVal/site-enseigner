@@ -70,11 +70,17 @@ def gestion_seances():
     return render_template('gestion_seances/index.html',
             sessions=model.Session.all())
 
-@app.route('/gestion_seances/nouvelle/')
+@app.route('/gestion_seances/nouvelle/', methods=['GET', 'POST'])
 @require_admin
 def nouvelle_seance():
-    return render_template('gestion_seances/nouvelle.html',
-                           sessions=model.Session.all())
+    if request.method == 'GET':
+        return render_template('gestion_seances/nouvelle.html',
+                               sessions=model.Session.all())
+    else:
+        s = controller.create_session(request.form['date'],
+                filter(bool, request.form['subjects'].split('\n')))
+        return redirect(url_for('gestion_seances'))
+
 
 @app.route('/connexion/', methods=['GET', 'POST'])
 def connexion():

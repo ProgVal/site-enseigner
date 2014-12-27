@@ -4,8 +4,8 @@ import enseigner.model as model
 
 class ModelTestCase(EnseignerTestCase):
     def testSingleton(self):
-        t1 = model.Tutor.create('foo', 'bar', False)
-        self.assertRaises(model.Duplicate, model.Tutor.create, 'foo', 'bar', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
+        self.assertRaises(model.Duplicate, model.Tutor.create, 'foo', '', 'bar', False)
         self.assertIs(t1, model.Tutor.get('foo'))
         self.assertRaises(AssertionError, model.Tutor, t1.uid, 'foo', 'bar', False)
         self.assertRaises(model.NotFound, model.Tutor.get, 'foobar')
@@ -15,21 +15,21 @@ class ModelTestCase(EnseignerTestCase):
         self.assertRaises(ValueError, model.Tutor.get, ('foo',))
 
     def testRepr(self):
-        t1 = model.Tutor.create('foo', 'bar')
+        t1 = model.Tutor.create('foo', '', 'bar')
         self.assertEqual(repr(t1),
-                "<enseigner.model.Tutor(uid=1, email='foo', "
+                "<enseigner.model.Tutor(uid=1, email='foo', name='', "
                 "password_hash='%s', phone_number=None, is_admin=False, "
                 "is_active=True, comment=None)>" %
                 model.password_hash(t1.uid, 'bar'))
 
 class TutorTestCase(EnseignerTestCase):
     def testGetTutors(self):
-        t1 = model.Tutor.create('foo', 'bar', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
         self.assertEqual(list(model.Tutor.all()), [t1])
 
     def testCheckPassword(self):
-        t1 = model.Tutor.create('foo', 'bar', False)
-        model.Tutor.create('foo2', 'bar2', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
+        model.Tutor.create('foo2', '', 'bar2', False)
         t2 = model.Tutor.get('foo2')
         self.assertIs(t1, model.Tutor.check_password('foo', 'bar'))
         self.assertIs(None, model.Tutor.check_password('foo', 'bar2'))
@@ -49,7 +49,7 @@ class TregTestCase(EnseignerTestCase):
     def testCheckForeignKeys(self):
         self.assertRaises(model.ForeignKeyNotMapped,
                 model.TutorRegistration.create, 10, 10, 3, None)
-        t1 = model.Tutor.create('foo', 'bar', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
         self.assertRaises(model.ForeignKeyNotMapped,
                 model.TutorRegistration.create, 10, t1, 3, None)
         s1 = model.Session.create('foo', 'bar')
@@ -60,9 +60,9 @@ class TregTestCase(EnseignerTestCase):
     def testAllInSession(self):
         s1 = model.Session.create('foo', 'bar')
         s2 = model.Session.create('foo2', 'bar2')
-        t1 = model.Tutor.create('foo', 'bar', False)
-        t2 = model.Tutor.create('foo2', 'bar', False)
-        t3 = model.Tutor.create('foo3', 'bar', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
+        t2 = model.Tutor.create('foo2', '', 'bar', False)
+        t3 = model.Tutor.create('foo3', '', 'bar', False)
         tr1 = model.TutorRegistration.create(s1, t1, 3, None)
         tr2 = model.TutorRegistration.create(s1, t3, 3, None)
         tr3 = model.TutorRegistration.create(s2, t3, 3, None)
@@ -74,9 +74,9 @@ class TregTestCase(EnseignerTestCase):
     def testGetFind(self):
         s1 = model.Session.create('foo', 'bar')
         s2 = model.Session.create('foo2', 'bar2')
-        t1 = model.Tutor.create('foo', 'bar', False)
-        t2 = model.Tutor.create('foo2', 'bar', False)
-        t3 = model.Tutor.create('foo3', 'bar', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
+        t2 = model.Tutor.create('foo2', '', 'bar', False)
+        t3 = model.Tutor.create('foo3', '', 'bar', False)
         tr1 = model.TutorRegistration.create(s1, t1, 3, None)
         tr2 = model.TutorRegistration.create(s1, t3, 3, None)
         tr3 = model.TutorRegistration.create(s2, t3, 3, None)
@@ -92,9 +92,9 @@ class TregTestCase(EnseignerTestCase):
     def testSubjects(self):
         s1 = model.Session.create('foo', 'bar')
         s2 = model.Session.create('foo2', 'bar2')
-        t1 = model.Tutor.create('foo', 'bar', False)
-        t2 = model.Tutor.create('foo2', 'bar', False)
-        t3 = model.Tutor.create('foo3', 'bar', False)
+        t1 = model.Tutor.create('foo', '', 'bar', False)
+        t2 = model.Tutor.create('foo2', '', 'bar', False)
+        t3 = model.Tutor.create('foo3', '', 'bar', False)
         tr1 = model.TutorRegistration.create(s1, t1, 3, None)
         tr2 = model.TutorRegistration.create(s1, t3, 3, None)
         tr3 = model.TutorRegistration.create(s2, t3, 3, None)
