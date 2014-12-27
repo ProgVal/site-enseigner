@@ -269,6 +269,8 @@ class Session(SingleKeyModel):
         session_id INTEGER PRIMARY KEY,
         session_date DATETIME,
         session_managers TEXT,
+        session_form_comment_students TEXT,
+        session_form_comment_tutors TEXT,
         session_emailed_students BOOLEAN,
         session_emailed_tutors BOOLEAN,
         session_is_open BOOLEAN
@@ -279,12 +281,17 @@ class Session(SingleKeyModel):
 
     @classmethod
     def create(cls, date, managers,
+            form_comment_students='', form_comment_tutors='',
             emailed_students=False, emailed_tutors=False, is_open=True):
         return cls._insert_one('''session_date, session_managers,
+                                  session_form_comment_students,
+                                  session_form_comment_tutors,
                                   session_emailed_students,
                                   session_emailed_tutors,
                                   session_is_open''',
-                               (date, managers, emailed_students, emailed_tutors,
+                               (date, managers, form_comment_students,
+                                form_comment_tutors, emailed_students,
+                                emailed_tutors,
                                 is_open))
 
     @classmethod
