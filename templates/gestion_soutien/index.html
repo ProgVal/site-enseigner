@@ -10,7 +10,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>À venir ?</th>
+                <th>Ouverte ?</th>
                 <th>Date</th>
                 <th>Tuteurs-trices</th>
                 <th>Élèves</th>
@@ -21,7 +21,7 @@
             {% if sessions %}
                 {% for session in sessions %}
                     <tr>
-                        <td>{% if session.is_future %}oui{% else %}non{% endif %}
+                        <td>{% if session.is_open %}oui{% else %}non{% endif %}
                         <td>{{ session.date|e }}</td>
                         <td>
                             {% if session.emailed_tutors %}
