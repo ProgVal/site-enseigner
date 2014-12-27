@@ -41,7 +41,7 @@ class StudentTestCase(EnseignerTestCase):
         s1 = model.Student.create('foo', 'bar', False, False, '')
         s2 = model.Student.create('foo2', 'bar2', False, False, '')
         self.assertRaises(model.Duplicate, model.Student.create, 'foo2', 'bar', True, False, 'baz')
-        self.assertEqual(list(model.Student.all()), [s1, s2])
+        self.assertEqual(model.Student.all(), {s1, s2})
         self.assertIs(model.Student.get(s2.uid), s2)
         self.assertRaises(ValueError, model.Student.get, s2.emails)
 
@@ -66,9 +66,9 @@ class TregTestCase(EnseignerTestCase):
         tr1 = model.TutorRegistration.create(s1, t1, 3, None)
         tr2 = model.TutorRegistration.create(s1, t3, 3, None)
         tr3 = model.TutorRegistration.create(s2, t3, 3, None)
-        self.assertEqual(set(model.TutorRegistration.all_in_session(s1)),
+        self.assertEqual(model.TutorRegistration.all_in_session(s1),
                          {tr1, tr2})
-        self.assertEqual(set(model.TutorRegistration.all_in_session(s2)),
+        self.assertEqual(model.TutorRegistration.all_in_session(s2),
                          {tr3})
 
     def testGetFind(self):
@@ -104,16 +104,16 @@ class TregTestCase(EnseignerTestCase):
         ts1 = model.TutorRegistrationSubject.create(tr1, sub2, 1)
         ts2 = model.TutorRegistrationSubject.create(tr1.trid, sub3, 2)
         ts3 = model.TutorRegistrationSubject.create(tr2, sub2.sid, 3)
-        self.assertEqual(set(model.TutorRegistrationSubject.all_of_treg(tr1)),
+        self.assertEqual(model.TutorRegistrationSubject.all_of_treg(tr1),
                 {ts1, ts2})
         self.assertEqual(
-                set(x.sid for x in model.TutorRegistrationSubject.all_of_treg(tr1)),
+                {x.sid for x in model.TutorRegistrationSubject.all_of_treg(tr1)},
                 {sub2.sid, sub3.sid})
-        self.assertEqual(set(model.TutorRegistrationSubject.all_of_treg(tr2)),
+        self.assertEqual(model.TutorRegistrationSubject.all_of_treg(tr2),
                 {ts3})
         model.TutorRegistrationSubject.set_for_treg(tr1, [(sub1, 1)])
         self.assertEqual(
-                set(x.sid for x in model.TutorRegistrationSubject.all_of_treg(tr1)),
+                {x.sid for x in model.TutorRegistrationSubject.all_of_treg(tr1)},
                 {sub1.sid})
 
 class SregTestCase(EnseignerTestCase):
@@ -132,9 +132,9 @@ class SregTestCase(EnseignerTestCase):
         sr4 = model.StudentRegistration.create(s2.sid, st1, sub2, 1, None)
         self.assertRaises(model.Duplicate,
                 model.StudentRegistration.create, s1, st1, sub2, 2, None)
-        self.assertEqual(set(model.StudentRegistration.all_in_session(s1)),
+        self.assertEqual(model.StudentRegistration.all_in_session(s1),
                 {sr1, sr2})
-        self.assertEqual(set(model.StudentRegistration.all_in_session(s1.sid)),
+        self.assertEqual(model.StudentRegistration.all_in_session(s1.sid),
                 {sr1, sr2})
         self.assertIs(model.StudentRegistration.find(s1, st3), sr2)
         self.assertIs(model.StudentRegistration.find(s1.sid, st3), sr2)
@@ -176,9 +176,9 @@ class MiscTestCase(EnseignerTestCase):
                 model.SessionSubject.create_for_session, s2, [sub2, sub2])
         ss2 = model.SessionSubject.create_for_session(s2, [sub2, sub3])
         ss2 = model.SessionSubject.create_for_session(s3.sid, [sub2.sid, sub3.sid])
-        self.assertEqual(set(model.SessionSubject.all_subjects_for_session(s1)),
+        self.assertEqual(model.SessionSubject.all_subjects_for_session(s1),
                 {sub1, sub3, sub4, sub5})
-        self.assertEqual(set(model.SessionSubject.all_subjects_for_session(s2.sid)),
+        self.assertEqual(model.SessionSubject.all_subjects_for_session(s2.sid),
                 {sub2, sub3, sub4, sub5})
-        self.assertEqual(set(model.SessionSubject.all_subjects_for_session(s3)),
+        self.assertEqual(model.SessionSubject.all_subjects_for_session(s3),
                 {sub2, sub3, sub4, sub5})

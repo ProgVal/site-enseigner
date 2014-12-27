@@ -85,8 +85,8 @@ def _model(nb_keys):
         @classmethod
         def _get_many(cls, request, args=()):
             r = cls._fetch_many(request, args)
-            return map(lambda x:cls._instances.get(cls.make_id(x), None) or 
-                                cls(*x), r)
+            return {cls._instances.get(cls.make_id(x), None) or cls(*x)
+                    for x in r}
 
     Model.__name__ = 'Model(%d)' % nb_keys
     return Model
