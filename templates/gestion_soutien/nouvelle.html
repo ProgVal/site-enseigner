@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block headers %}
+    {{ super() }}
+    <link rel="stylesheet" type="text/css" media="screen" href="//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/master/build/css/bootstrap-datetimepicker.min.css" />
+{% endblock %}
+
+{% block navbar_gestionseances_selection %} class="active"{% endblock %}
+
+{% block body %}
+<form action="{{ url_for('nouvelle_seance') }}" method="post" class="new_session_form">
+    <div class='input-group date' id='datetimepicker1'>
+        <label for="date">Date</label>
+        <input type='text' class="form-control" name="date" id="date" />
+        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+    </div>
+    <script type="text/javascript">
+        $(function () {
+            $('#datetimepicker1').datetimepicker({language: 'fr'});
+        });
+    </script>
+    <label for="subjects">Matières exceptionnelles (une par ligne)"</label>
+    <textarea name="subjects" id="subjects"></textarea>
+    <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+    <button class="btn btn-lg btn-primary btn-block" type="submit">Créer la séance</button>
+</form>
+{% endblock %}
+
+{% block footer_scripts %}
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/moment.min.js"></script>
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.4/locales.js"></script>
+<script type="text/javascript" src="//cdn.rawgit.com/Eonasdan/bootstrap-datetimepicker/master/src/js/bootstrap-datetimepicker.js"></script>
+{% endblock %}

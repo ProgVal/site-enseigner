@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block navbar_gestionseances_selection %} class="active"{% endblock %}
+
+{% block body %}
+    <form action="{{ url_for('nouvelle_seance') }}" method="get" class="new_session_form">
+        <button type="submit" class="btn btn-lg btn-default">Nouvelle séance</button>
+    </form>
+    <div style="clear: both"></div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>À venir ?</th>
+                <th>Date</th>
+                <th>Tuteurs-trices</th>
+                <th>Élèves</th>
+                <th>Responsable-s séance</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if sessions %}
+                {% for session in sessions %}
+                    <tr>
+                        <td>{% if session.is_future %}oui{% else %}non{% endif %}
+                        <td>{{ session.date|e }}</td>
+                        <td>{{ session.nb_tutors|e }}</td>
+                        <td>{{ session.nb_students|e }}</td>
+                        <td>{{ session.managers|map(attribute='email')|join(', ') }}</td>
+                    </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="5">Aucune séance</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+{% endblock %}
