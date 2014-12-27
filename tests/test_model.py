@@ -22,6 +22,10 @@ class ModelTestCase(EnseignerTestCase):
                 "is_active=True, comment=None)>" %
                 model.password_hash(t1.uid, 'bar'))
 
+    def testGetattr(self):
+        t1 = model.Tutor.create('foo', '', 'bar')
+        self.assertFalse(hasattr(t1, 'fojgjoj'))
+
 class TutorTestCase(EnseignerTestCase):
     def testGetTutors(self):
         t1 = model.Tutor.create('foo', '', 'bar', False)

@@ -51,6 +51,8 @@ def _model(nb_keys):
         def __getattr__(self, name):
             if name in self._attributes:
                 return self._attributes[name]
+            else:
+                raise ValueError()
 
         @classmethod
         def _check_exists(cls, cls2, key):
