@@ -152,6 +152,24 @@ class SregTestCase(EnseignerTestCase):
     def testGet(self):
         self.assertRaises(ValueError, model.StudentRegistration.get, 'foo')
 
+    def testUpdate(self):
+        s1 = model.Session.create('foo', 'bar')
+        s2 = model.Session.create('foo2', 'bar2')
+        st1 = model.Student.create('foo', 'bar', False, False, '')
+        st2 = model.Student.create('foo2', 'bar2', False, False, '')
+        st3 = model.Student.create('foo3', 'bar3', False, False, '')
+        sub1 = model.Subject.create('foo', False)
+        sub2 = model.Subject.create('bar', False)
+        sub3 = model.Subject.create('baz', False)
+        sr1 = model.StudentRegistration.create(s1, st1, sub1, 1, None)
+        sr2 = model.StudentRegistration.create(s1, st3, sub3.sid, 1,None)
+        sr2.update(sub2, 2, 'bar')
+        self.assertEqual(sr2.subject, sub2.sid)
+        del model.StudentRegistration._instances[sr2.srid]
+        sr2b = model.StudentRegistration.find(s1, st3)
+        self.assertIsNot(sr2, sr2b)
+        self.assertEqual(sr2b.friends, 2)
+
 class MiscTestCase(EnseignerTestCase):
     def testSession(self):
         s1 = model.Session.create('foo', 'bar')

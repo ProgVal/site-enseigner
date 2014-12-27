@@ -5,6 +5,11 @@ import collections
 import model
 from config import config
 
+TutorForm = collections.namedtuple('TutorForm',
+        'tutor subjects group_size comment')
+StudentForm = collections.namedtuple('StudentForm',
+        'student subject friends comment')
+
 class WrongHash(Exception):
     pass
 def hash_subscription_params(session_id, type_, user_id):
@@ -34,8 +39,6 @@ def create_session(date, exceptional_subjects_names):
     model.SessionSubject.create_for_session(session, subjects)
     return session
 
-TutorForm = collections.namedtuple('TutorForm',
-        'email name subjects group_size comment')
 @check_hash('tutor')
 def get_tutor_form_data(session, tutor):
     tutor = model.Tutor.get(int(tutor))
@@ -49,22 +52,47 @@ def get_tutor_form_data(session, tutor):
         subjects = set()
         group_size = 0
         comment = ''
-    return TutorForm(tutor.email, tutor.name, subjects, group_size, comment)
+    return TutorForm(tutor, subjects, group_size, comment)
 
 @check_hash('tutor')
 def set_tutor_form_data(session, tutor, subjects, group_size, comment):
     try:
         treg = model.TutorRegistration.find(int(session), int(tutor))
-        treg.update(group_size, comment)
     except model.NotFound:
         treg = model.TutorRegistration.create(int(session), int(tutor), group_size, comment)
+    else:
+        treg.update(group_size, comment)
     # TODO: handle multiple preferences
     model.TutorRegistrationSubject.set_for_treg(treg,
             ((model.Subject.get(int(x)), 1) for x in subjects))
+    return treg
 
 @check_hash('student')
 def get_student_form_data(session, student):
+    session = int(session)
+    student = model.Student.get(int(student))
     try:
-        return model.StudentRegistration.find(int(session), int(student))
+        sreg = model.StudentRegistration.find(session, student)
+        subject = model.Subject.get(sreg.suid)
+        friends = sreg.friends
+        comment = sreg.comment
     except model.NotFound:
-        return None
+        subject = None
+        friends = 0
+        comment = ''
+    return StudentForm(student, subject, friends, comment)
+
+@check_hash('student')
+def set_student_form_data(session, student, subject, friends, comment):
+    session = int(session)
+    student = int(student)
+    subject = model.Subject.get(int(subject))
+    friends = int(friends)
+    try:
+        sreg = model.StudentRegistration.find(session, student)
+    except model.NotFound:
+        sreg = model.StudentRegistration.create(session, student,
+                subject, friends, comment)
+    else:
+        sreg.update(subject, friends, comment)
+    return sreg

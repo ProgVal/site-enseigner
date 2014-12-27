@@ -52,7 +52,7 @@ def _model(nb_keys):
             if name in self._attributes:
                 return self._attributes[name]
             else:
-                raise ValueError()
+                raise AttributeError('%r has not attribute %r' % (self, name))
 
         @classmethod
         def _check_exists(cls, cls2, key):
@@ -536,15 +536,15 @@ class StudentRegistration(SingleKeyModel):
     _table = 'student_registrations'
     _create_table = '''CREATE TABLE student_registrations (
         sreg_id INTEGER PRIMARY KEY,
-        sreg_session_id INTEGER,
-        sreg_student_id INTEGER,
-        sreg_subject_id INTEGER,
+        session_id INTEGER,
+        student_id INTEGER,
+        subject_id INTEGER,
         sreg_friends INTEGER,
         sreg_comment TEXT,
-        FOREIGN KEY (sreg_session_id) REFERENCES sessions(session_id),
-        FOREIGN KEY (sreg_student_id) REFERENCES students(student_id),
-        FOREIGN KEY (sreg_subject_id) REFERENCES subjects(subject_id),
-        UNIQUE (sreg_session_id, sreg_student_id)
+        FOREIGN KEY (session_id) REFERENCES sessions(session_id),
+        FOREIGN KEY (student_id) REFERENCES students(student_id),
+        FOREIGN KEY (subject_id) REFERENCES subjects(subject_id),
+        UNIQUE (session_id, student_id)
         )'''
     _fields = ('srid', 'seid', 'stid', 'suid', 'friends', 'comment')
 
@@ -565,8 +565,8 @@ class StudentRegistration(SingleKeyModel):
         assert isinstance(session, int), session
         assert isinstance(student, int), student
         assert isinstance(subject, int), subject
-        return cls._insert_one('''sreg_session_id, sreg_student_id,
-                                  sreg_subject_id, sreg_friends, sreg_comment''',
+        return cls._insert_one('''session_id, student_id,
+                                  subject_id, sreg_friends, sreg_comment''',
                                (session, student, subject) + args)
         
     @classmethod
@@ -591,7 +591,7 @@ class StudentRegistration(SingleKeyModel):
             session = session.sid
         assert isinstance(session, int), session
         return cls._get_many('''SELECT * FROM student_registrations
-                                WHERE sreg_session_id=?''', (session,))
+                                WHERE session_id=?''', (session,))
 
     @classmethod
     def find(cls, session, student):
@@ -606,7 +606,7 @@ class StudentRegistration(SingleKeyModel):
             assert isinstance(student, int), student
             cls._check_exists(Student, student)
         r = cls._get_many('''SELECT * FROM student_registrations
-                             WHERE sreg_session_id=? AND sreg_student_id=?''',
+                             WHERE session_id=? AND student_id=?''',
                           (session, student))
         r = list(r)
         if not r:
@@ -614,3 +614,20 @@ class StudentRegistration(SingleKeyModel):
         else:
             assert len(r) == 1, r
             return r[0]
+
+    def update(self, subject, friends, comment):
+        if isinstance(subject, Subject):
+            subject = subject.sid
+        else:
+            cls._check_exists(Subject, subject)
+        assert isinstance(friends, int), friends
+        assert isinstance(comment, str), comment
+        assert isinstance(subject, int), subject
+        conn = get_conn()
+        conn.execute('''UPDATE student_registrations SET
+                        subject_id=?, sreg_friends=?, sreg_comment=?
+                        WHERE sreg_id=?''',
+                     (subject, friends, comment, self.srid,))
+        self.subject = subject
+        self.friends = friends
+        self.comment = comment
