@@ -376,6 +376,15 @@ class TutorRegistration(SingleKeyModel):
             assert len(r) == 1
             return r[0]
 
+    def update(self, group_size, comment):
+        conn = get_conn()
+        conn.execute('''UPDATE tutor_registrations SET
+                        treg_group_size=?, treg_comment=?
+                        WHERE treg_id=?''',
+                     (group_size, comment, self.trid,))
+        self.group_size = group_size
+        self.comment = comment
+
 @register
 class Subject(SingleKeyModel):
     _table = 'subjects'

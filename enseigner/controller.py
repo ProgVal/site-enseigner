@@ -34,21 +34,27 @@ def create_session(date, exceptional_subjects_names):
     return session
 
 @check_hash('tutor')
-def get_tutor_subjects(session, tutor):
+def get_tutor_form_data(session, tutor):
+    tutor = model.Tutor.get(int(tutor))
     try:
-        treg = model.TutorRegistration.find(int(session), int(tutor))
-        return (model.Subject.get(x.sid)
-                for x in model.TutorRegistrationSubject.all_of_treg(treg))
+        treg = model.TutorRegistration.find(int(session), tutor)
+        subjects = (model.Subject.get(x.sid)
+                    for x in model.TutorRegistrationSubject.all_of_treg(treg))
+        group_size = treg.group_size
+        comment = treg.comment
     except model.NotFound:
-        return []
+        subjects = set()
+        group_size = 0
+        comment = ''
+    return (tutor.email, tutor.name, subjects, group_size, comment)
 
 @check_hash('tutor')
-def set_tutor_subjects(session, tutor, subjects, group_size, comments):
+def set_tutor_form_data(session, tutor, subjects, group_size, comment):
     try:
         treg = model.TutorRegistration.find(int(session), int(tutor))
-        # TODO: handle change of group size and comment
+        treg.update(group_size, comment)
     except model.NotFound:
-        treg = model.TutorRegistration.create(int(session), int(tutor), group_size, comments)
+        treg = model.TutorRegistration.create(int(session), int(tutor), group_size, comment)
     # TODO: handle multiple preferences
     model.TutorRegistrationSubject.set_for_treg(treg,
             ((model.Subject.get(int(x)), 1) for x in subjects))
