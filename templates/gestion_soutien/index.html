@@ -23,9 +23,22 @@
                     <tr>
                         <td>{% if session.is_future %}oui{% else %}non{% endif %}
                         <td>{{ session.date|e }}</td>
-                        <td>{{ session.nb_tutors|e }}</td>
-                        <td>{{ session.nb_students|e }}</td>
-                        <td>{{ session.managers|map(attribute='email')|join(', ') }}</td>
+                        <td>
+                            {% if session.emailed_tutors %}
+                            {{ session.emailed_tutors }}
+                                {{ session.nb_tutors }}
+                            {% else %}
+                                <a href="{{ url_for('envoi_mail_tuteurs') }}">mail non envoyé</a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.emailed_tutors %}
+                                {{ session.nb_students }}
+                            {% else %}
+                                <a href="{{ url_for('envoi_mail_eleves')}} ">mail non envoyé</a>
+                            {% endif %}
+                        </td>
+                        <td>{{ session.managers|map(attribute='email')|join(', ')|e }}</td>
                     </tr>
                 {% endfor %}
             {% else %}

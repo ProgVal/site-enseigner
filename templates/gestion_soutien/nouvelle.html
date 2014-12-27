@@ -8,21 +8,48 @@
 {% block navbar_gestionseances_selection %} class="active"{% endblock %}
 
 {% block body %}
-<form action="{{ url_for('nouvelle_seance') }}" method="post" class="new_session_form">
-    <div class='input-group date' id='datetimepicker1'>
-        <label for="date">Date</label>
-        <input type='text' class="form-control" name="date" id="date" />
-        <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+<h1>Création d’une nouvelle séance</h1>
+
+{% if invalid %}
+    <div class="alert alert-danger" role="alert">
+        Un ou plusieurs champ est/sont invalides.
     </div>
-    <script type="text/javascript">
-        $(function () {
-            $('#datetimepicker1').datetimepicker({language: 'fr'});
-        });
-    </script>
-    <label for="subjects">Matières exceptionnelles (une par ligne)"</label>
-    <textarea name="subjects" id="subjects"></textarea>
-    <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
-    <button class="btn btn-lg btn-primary btn-block" type="submit">Créer la séance</button>
+{% endif %}
+
+<form action="{{ url_for('nouvelle_seance') }}" method="post" class="form-horizontal">
+    <div class="form-group {% if 'date' in invalid %}has-error{% endif %}">
+        <label for="date">Date</label>
+        <div class='input-group date' id='datetimepicker1'>
+            <input type='text' class="form-control" name="date" id="date" value="{{ form['date'] }}" />
+            <span class="input-group-addon"><span class="glyphicon glyphicon-calendar"></span>
+        </div>
+        <script type="text/javascript">
+            $(function () {
+                $('#datetimepicker1').datetimepicker({language: 'fr'});
+            });
+
+        </script>
+    </div>
+
+    <div class="form-group {% if 'students_comment' in invalid %}has-error{% endif %}">
+        <label for="students_comment">Introduction du formulaire élèves</label>
+        <textarea name="students_comment" id="students_comment" class="form-control" rows="5">{{ form['students_comment'] }}</textarea>
+    </div>
+
+    <div class="form-group {% if 'tutors_comment' in invalid %}has-error{% endif %}">
+        <label for="tutors_comment">Introduction du formulaire tuteurs-trices</label>
+        <textarea name="tutors_comment" id="tutors_comment" class="form-control" rows="5">{{ form['tutors_comment'] }}</textarea>
+    </div>
+
+    <div class="form-group" {% if 'subjects' in invalid %}has-error{% endif %}>
+        <label for="subjects">Matières exceptionnelles / séances de méthodologie (une par ligne)</label>
+        <textarea name="subjects" id="subjects" class="form-control" rows="5">{{ form['subjects'] }}</textarea>
+    </div>
+
+    <div class="form-group">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+        <button class="btn btn-lg btn-primary btn-block" type="submit" class="form-control">Créer la séance</button>
+    </div>
 </form>
 {% endblock %}
 

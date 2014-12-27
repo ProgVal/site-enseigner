@@ -7,6 +7,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Response
 
 import model
+import controller
 from config import config
 
 app = Flask('enseigner')
@@ -64,29 +65,47 @@ def inscription():
 def prochaines_seances():
     return render_template('prochaines_seances.html')
 
-@app.route('/gestion_seances/')
+@app.route('/gestion_soutien/')
 @require_admin
-def gestion_seances():
-    return render_template('gestion_seances/index.html',
+def gestion_soutien():
+    return render_template('gestion_soutien/index.html',
             sessions=model.Session.all())
 
-@app.route('/gestion_seances/nouvelle/', methods=['GET', 'POST'])
+@app.route('/gestion_soutien/nouvelle/', methods=['GET', 'POST'])
 @require_admin
 def nouvelle_seance():
-    if request.method == 'GET':
-        return render_template('gestion_seances/nouvelle.html',
-                               sessions=model.Session.all())
+    if request.method == 'POST':
+        invalid = set(x for x in ('date',) if not request.form.get(x, ''))
+        if 'date' not in invalid:
+            try:
+                controller.parse_human_date(request.form['date'])
+            except ValueError:
+                invalid.add('date')
+    else:
+        invalid = []
+    if request.method == 'GET' or invalid:
+        return render_template('gestion_soutien/nouvelle.html',
+                               sessions=model.Session.all(),
+                               invalid=invalid,
+                               form=request.form)
     else:
         s = controller.create_session(request.form['date'],
                 filter(bool, request.form['subjects'].split('\n')))
-        return redirect(url_for('gestion_seances'))
+        return redirect(url_for('gestion_soutien'))
 
+@app.route('/gestion_soutien/envoi_mail_seance/tuteurs/', methods=['GET', 'POST'])
+def envoi_mail_tuteurs():
+    pass
+@app.route('/gestion_soutien/envoi_mail_seance/eleves/', methods=['GET', 'POST'])
+def envoi_mail_eleves():
+    pass
 
 @app.route('/connexion/', methods=['GET', 'POST'])
 def connexion():
     if request.method == 'GET':
         redirect_url = request.args.get('redirect_url', '')
-        return render_template('connexion.html', redirect_url=redirect_url)
+        return render_template('connexion.html', redirect_url=redirect_url,
+                just_redirected=True)
     elif request.method == 'POST':
         email = request.form.get('email', None)
         password = request.form.get('password', None)
@@ -94,8 +113,9 @@ def connexion():
         assert email and password, request.form
         tutor = model.Tutor.check_password(email, password)
         if not tutor:
-            # TODO: Show an error message
-            return render_template('connexion.html', redirect_url=redirect_url)
+            return render_template('connexion.html',
+                    redirect_url=redirect_url,
+                    wrong_login=True)
         else:
             session['tutor_id'] = tutor.uid
             return redirect('/' + redirect_url)

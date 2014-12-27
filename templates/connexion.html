@@ -11,6 +11,16 @@
 {% block navbar_admin_selection %} class="active"{% endblock %}
 
 {% block body %}
+{% if wrong_login %}
+    <div class="alert alert-danger" role="alert">
+        Mauvais mot de mot de passe ou adresse mail.
+    </div>
+{% endif %}
+{% if just_redirected %}
+    <div class="alert alert-warning" role="alert">
+        Vous devez vous connecter pour accéder à cette section.
+    </div>
+{% endif %}
 <form class="form-signin" role="form" method="post">
     <h2 class="form-signin-heading">Veuillez vous connecter</h2>
     <label for="email" class="sr-only">Adresse mail</label>
