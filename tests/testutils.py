@@ -12,7 +12,7 @@ class EnseignerTestCase(unittest.TestCase):
                 table._instances = model.weakref.WeakValueDictionary()
                 self.db.execute(table._create_table)
         (self._get_conn, model.get_conn) = (model.get_conn, lambda: self.db)
-        emails.MockServer.queue = []
+        emails.MockSender.queue = []
     def tearDown(self):
         super(EnseignerTestCase, self).setUp()
         model.get_conn = self._get_conn

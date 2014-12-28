@@ -7,6 +7,7 @@
     "secret_key": "ooooooooooooooooooooooooooooooooo",
     "email": {
         "from": "enseignersoutien@foo",
+        "cci": "automail_enseigner_cci@aperio.fr",
         "server": "smtp.gmail.com:587",
         "username": "enseignersoutien",
         "password": "foo"

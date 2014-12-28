@@ -199,8 +199,8 @@ class Tutor(SingleKeyModel):
 
     @classmethod
     def all_active(cls):
-        return cls._get_many('''SELECT * FROM students
-                                WHERE student_is_active=1''')
+        return cls._get_many('''SELECT * FROM tutors
+                                WHERE tutor_is_active=1''')
 
 
     @classmethod
@@ -691,20 +691,26 @@ class StudentRegistration(SingleKeyModel):
 @register
 class Mail(SingleKeyModel):
     _table = 'mails'
-    _create_table = '''CREATE TABLE queued_mails (
+    _create_table = '''CREATE TABLE mails (
         mail_id INTEGER PRIMARY KEY,
         mail_recipient TEXT,
+        mail_subject TEXT,
         mail_content TEXT,
         mail_sent BOOLEAN
         )'''
     _instances = weakref.WeakValueDictionary()
-    _fields = ('mid', 'recipient', 'content', 'sent')
+    _fields = ('mid', 'recipient', 'subject', 'content', 'sent')
 
     @classmethod
     def create(cls, recipient, content, sent=False):
-        return cls._insert_one('''mail_recipient, mail_content, mail_sent''',
+        return cls._insert_one('''mail_recipient, mail_subject, mail_content, mail_sent''',
                                (recipient, content, sent))
 
+    @classmethod
+    def create_many(cls, rows):
+        rows = [(x[0], x[1], x[2], x[3] if len(x) > 3 else False) for x in rows]
+        return cls._insert_many('''mail_recipient, mail_subject, mail_content, mail_sent''',
+                                rows)
 
     @classmethod
     def get(cls, mid):

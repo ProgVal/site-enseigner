@@ -5,7 +5,7 @@ import unittest
 import enseigner.emails
 
 def main(): # pragma: no cover
-    enseigner.emails.Sender = enseigner.emails.MockServer
+    enseigner.emails.Sender = enseigner.emails.MockSender
     testsuite = unittest.TestLoader().discover('tests/')
     results = unittest.TextTestRunner(verbosity=1).run(testsuite)
     if results.errors or results.failures:

@@ -1,8 +1,11 @@
+import string
+import smtplib
 import hashlib
 import datetime
 import collections
 
 import model
+import emails
 from config import config
 
 TutorForm = collections.namedtuple('TutorForm',
@@ -96,3 +99,25 @@ def set_student_form_data(session, student, subject, friends, comment):
     else:
         sreg.update(subject, friends, comment)
     return sreg
+
+def send_tutor_email(form_url, subject, content):
+    tutors = model.Tutor.all_active()
+    def pred(tutor):
+        repl = {'nom_tuteur': tutor.name,
+                'lien_formulaire_tuteur': form_url
+                }
+        return (tutor.email,
+                string.Template(subject).substitute(repl),
+                string.Template(content).substitute(repl)
+                )
+    mails = model.Mail.create_many(map(pred, tutors))
+    sender = emails.Sender()
+    errors = []
+    for mail in mails:
+        try:
+            sender.send(mail.recipient, mail.subject, mail.content)
+        except smtplib.SMTPException as e:
+            errors.append(e)
+        else:
+            mail.set_sent()
+    return errors

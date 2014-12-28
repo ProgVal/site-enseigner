@@ -7,6 +7,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Response
 
 import model
+import emails
 import controller
 from config import config
 
@@ -113,26 +114,58 @@ def nouvelle_seance():
                 filter(bool, request.form['subjects'].split('\n')))
         return redirect(url_for('gestion_soutien'))
 
+def mail_get_invalid():
+    if request.method == 'POST':
+        invalid = set(x for x in ('subject', 'content')
+                      if not request.form.get(x, ''))
+        return invalid
+    else:
+        return []
 @app.route('/gestion_soutien/envoi_mail_seance/tuteurs/', methods=['GET', 'POST'])
 def envoi_mail_tuteurs():
     session = model.Session.get(int(request.args['session']))
-    if request.method == 'GET':
-        subj_repl = {'date': session.date.strftime('%d/%m/%Y')}
-        return render_template('gestion_soutien/envoi_mail.html',
-                               recipient='Tuteurs et tutrices',
-                               sender=config['email']['from'],
-                               subject=TUTORS_EMAIL_SUBJECT % subj_repl,
-                               content=TUTORS_EMAIL_CONTENT)
+    invalid = mail_get_invalid()
+    if request.method == 'POST' and not invalid:
+        subject = request.form['subject']
+        content = request.form['content']
+        form_url = url_for('formulaire_tuteur',
+                session=session.sid,
+                tuteur=tutor.uid,
+                key=hash_subscription_params(session.sid, 'tutor', tutor.uid)
+                )
+        errors = controller.send_tutor_email(form_url, subject, content)
+        if not errors:
+            return
+    else:
+        errors = ['Un ou des champs est/sont invalide-s']
+
+    subj_repl = {'date': session.date.strftime('%d/%m/%Y')}
+    subject = request.form.get('subject', '') or \
+            TUTORS_EMAIL_SUBJECT % subj_repl
+    content = request.form.get('content', '') or TUTORS_EMAIL_CONTENT
+    return render_template('gestion_soutien/envoi_mail.html',
+                           recipient='Tuteurs et tutrices',
+                           sender=config['email']['from'],
+                           subject=subject,
+                           content=content,
+                           errors=errors,
+                           invalid=invalid)
+        
 @app.route('/gestion_soutien/envoi_mail_seance/eleves/', methods=['GET', 'POST'])
 def envoi_mail_eleves():
     session = model.Session.get(int(request.args['session']))
-    if request.method == 'GET':
+    invalid = mail_get_invalid()
+    if request.method == 'GET' or invalid:
         subj_repl = {'date': session.date.strftime('%d/%m/%Y')}
+        subject = request.form.get('subject', '') or \
+                STUDENTS_EMAIL_SUBJECT % subj_repl
+        content = request.form.get('content', '') or STUDENTS_EMAIL_CONTENT
         return render_template('gestion_soutien/envoi_mail.html',
                                recipient=u'Élèves',
                                sender=config['email']['from'],
-                               subject=STUDENTS_EMAIL_SUBJECT % subj_repl,
-                               content=STUDENTS_EMAIL_CONTENT)
+                               subject=subject,
+                               content=content,
+                               invalid=invalid)
 
 @app.route('/connexion/', methods=['GET', 'POST'])
 def connexion():
