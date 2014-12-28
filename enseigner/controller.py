@@ -2,6 +2,7 @@ import string
 import smtplib
 import hashlib
 import datetime
+import operator
 import collections
 
 import model
@@ -54,6 +55,12 @@ def get_tutor_registration_list_rows(session):
             [model.Subject.get(x.sid) for x in subjects if x.preference == 2],
             treg.comment
             ))
+    def key(x):
+        if x.subjects1:
+            return min(map(operator.attrgetter('sid'), x.subjects1))
+        else:
+            return 1000000
+    rows.sort(key=key)
     return rows
 
 @check_hash('tutor')

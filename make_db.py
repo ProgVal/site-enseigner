@@ -5,19 +5,19 @@ import sys
 import enseigner.model as model
 
 SUBJECTS = u'''
+Mathématiques
+Physique-Chimie : Physique
+Physique-Chimie : Chimie
+Sciences de la Vie et de la Terre : Biologie
+Sciences de la Vie et de la Terre : Géologie
+Français
+Philosophie
 Allemand
 Anglais
 Espagnol
-Français
-Philosophie
 Histoire
 Géographie
 Informatique et Sciences du Numérique
-Mathématiques
-Physique-Chimie : Chimie
-Physique-Chimie : Physique
-Sciences de la Vie et de la Terre : Biologie
-Sciences de la Vie et de la Terre : Géologie
 Sciences de l’Ingénieur
 Sciences Économiques et Sociales
 '''

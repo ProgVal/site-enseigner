@@ -111,6 +111,8 @@ def liste_tuteurs_seance():
                     row.comment)
         io = StringIO()
         with odswriter.writer(io) as odsfile:
+            odsfile.writerow(['Nom', 'Email', u'Matière principale',
+                u'Autres matières', 'Commentaire', 'Confirmation'])
             for row in rows:
                 odsfile.writerow(pred(row))
         io.seek(0)
