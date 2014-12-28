@@ -120,4 +120,5 @@ def send_tutor_email(session, get_form_url, subject, content):
             errors.append((mail, e))
         else:
             mail.set_sent()
+    session.set_emailed_tutors()
     return errors

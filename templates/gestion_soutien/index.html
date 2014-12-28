@@ -25,14 +25,13 @@
                         <td>{{ session.date|e }}</td>
                         <td>
                             {% if session.emailed_tutors %}
-                            {{ session.emailed_tutors }}
                                 {{ session.nb_tutors }}
                             {% else %}
                                 <a href="{{ url_for('envoi_mail_tuteurs', session=session.sid) }}">mail non envoyé</a>
                             {% endif %}
                         </td>
                         <td>
-                            {% if session.emailed_tutors %}
+                            {% if session.emailed_students %}
                                 {{ session.nb_students }}
                             {% else %}
                                 <a href="{{ url_for('envoi_mail_eleves', session=session.sid) }} ">mail non envoyé</a>
