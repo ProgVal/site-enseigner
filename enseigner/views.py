@@ -3,7 +3,7 @@ import os
 import uuid
 import collections
 from flask import Flask, render_template, request, session, redirect, url_for
-from flask import abort
+from flask import abort, Response
 from werkzeug.exceptions import HTTPException
 from werkzeug.wrappers import Response
 
@@ -99,9 +99,22 @@ def liste_tuteurs_seance():
     session = model.Session.get(int(request.args['session']))
     rows = controller.get_tutor_registration_list_rows(session)
 
-    return render_template('gestion_soutien/liste_tuteurs_seance.html',
-            session=session,
-            rows=rows)
+    if request.args.get('download', 'false') == 'true':
+        def pred(row):
+            return '%s;%s;%s;%s;%s' % (
+                    row.tutor.name,
+                    row.tutor.email,
+                    ', '.join(x.name for x in row.subjects1),
+                    ', '.join(x.name for x in row.subjects2),
+                    row.comment)
+        response = Response('\n'.join(map(pred, rows)),
+                mimetype='text/csv')
+        response.headers["Content-Disposition"] = "attachment; filename=Tuteurs_seance.csv"
+        return response
+    else:
+        return render_template('gestion_soutien/liste_tuteurs_seance.html',
+                session=session,
+                rows=rows)
 
 @app.route('/gestion_soutien/nouvelle/', methods=['GET', 'POST'])
 @require_admin
