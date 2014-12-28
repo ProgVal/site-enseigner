@@ -128,7 +128,7 @@ def envoi_mail_tuteurs():
     if request.method == 'POST' and not invalid:
         subject = request.form['subject']
         content = request.form['content']
-        form_url = url_for('formulaire_tuteur',
+        form_url = url_for('formulaire_tuteur', _external=True,
                 session=session.sid,
                 tuteur=tutor.uid,
                 key=hash_subscription_params(session.sid, 'tutor', tutor.uid)
