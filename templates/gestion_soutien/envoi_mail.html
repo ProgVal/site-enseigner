@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block navbar_gestionsoutien_selection %} class="active"{% endblock %}
+
+{% block body %}
+<h1>Envoi d’un mail</h1>
+
+{% for error in errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+{% endfor %}
+
+<form action="" method="post" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">De</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{ sender }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">À</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{ recipient }}</p>
+        </div>
+    </div>
+    <div class="form-group {% if 'subject' in invalid %}has-error{% endif %}">
+        <label class="col-sm-2 control-label" for="subject">Objet</label>
+        <div class="col-sm-10">
+            <input type="text" name="subject" id="subject" class="form-control" value="{{ subject|e }}" />
+        </div>
+    </div>
+    <div class="form-group {% if 'content' in invalid %}has-error{% endif %}">
+        <label class="col-sm-2 control-label" for="content">Message</label>
+        <div class="col-sm-10">
+            <textarea name="content" id="content" rows="15" class="form-control">{{ content|e }}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+        <button class="btn btn-lg btn-primary btn-block" type="submit" class="form-control">Envoyer le mail</button>
+    </div>
+
+{% endblock %}
