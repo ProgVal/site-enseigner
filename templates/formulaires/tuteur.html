@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block navbar_inscription_selection %} class="active"{% endblock %}
+
+{% block body %}
+<h1>Formulaire de participation</h1>
+
+{% if success %}
+    <div class="alert alert-success" role="alert">
+        Votre inscription a bien été enregistré. Merci pour votre participation&nbsp;!
+        <br />
+        N’hésitez pas à modifier le formulaire si nécessaire.
+    </div>
+{% endif %}
+
+{% for error in errors %}
+    <div class="alert alert-danger" role="alert">
+        {{ error }}
+    </div>
+{% endfor %}
+
+<form action="" method="post" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Nom</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{ form.tutor.name }}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Adresse mail</label>
+        <div class="col-sm-10">
+            <p class="form-control-static">{{ form.tutor.email }}</p>
+        </div>
+    </div>
+    <div class="form-group {% if 'group_size' in invalid %}has-error{% endif %}">
+        <label class="col-sm-2 control-label" for="group_size">Nombre maximum d’élèves</label>
+        <div class="col-sm-10">
+            <input type="text" name="group_size" id="group_size" class="form-control" value="{{ form.group_size }}" />
+        </div>
+    </div>
+    <div class="form-group {% if 'subjects1' in invalid %}has-error{% endif %}">
+        <label class="col-sm-2 control-label" for="subjects1">Matières préférées</label>
+        <div class="col-sm-10">
+            {% for subject in session_subjects %}
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="subjects1" value="{{ subject.sid }}" {% if (subject, 1) in form.subjects %}checked="checked"{% endif %} />
+                        {{ subject.name }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-group {% if 'subjects2' in invalid %}has-error{% endif %}">
+        <label class="col-sm-2 control-label" for="subjects2">Autres matières</label>
+        <div class="col-sm-10">
+            {% for subject in session_subjects %}
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" name="subjects2" value="{{ subject.sid }}" {% if (subject, 2) in form.subjects %}checked="checked"{% endif %} />
+                        {{ subject.name }}
+                    </label>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="form-group" {% if 'comment' in invalid %}has-error{% endif %}>
+        <label class="col-sm-2 control-label" for="comment">Remarques</label>
+        <div class="col-sm-10">
+            <textarea name="comment" id="comment" class="form-control" rows="5">{{ form.comment }}</textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <input name="_csrf_token" type="hidden" value="{{ csrf_token() }}">
+        <button class="btn btn-lg btn-primary btn-block" type="submit" class="form-control">Valider</button>
+    </div>
+</form>
+{% endblock %}
