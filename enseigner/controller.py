@@ -100,7 +100,7 @@ def set_student_form_data(session, student, subject, friends, comment):
         sreg.update(subject, friends, comment)
     return sreg
 
-def send_tutor_email(get_form_url, subject, content):
+def send_tutor_email(session, get_form_url, subject, content):
     tutors = model.Tutor.all_active()
     def pred(tutor):
         repl = {'nom_tuteur': tutor.name,
@@ -117,7 +117,7 @@ def send_tutor_email(get_form_url, subject, content):
         try:
             sender.send(mail.recipient, mail.subject, mail.content)
         except smtplib.SMTPException as e:
-            errors.append(e)
+            errors.append((mail, e))
         else:
             mail.set_sent()
     return errors

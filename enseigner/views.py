@@ -135,7 +135,7 @@ def envoi_mail_tuteurs():
                     tuteur=tutor.uid,
                     key=key
                     )
-        errors = controller.send_tutor_email(get_form_url, subject, content)
+        errors = controller.send_tutor_email(session, get_form_url, subject, content)
         if not errors:
             return redirect(url_for('gestion_soutien'))
     elif request.method == 'POST':

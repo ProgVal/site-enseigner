@@ -1,3 +1,5 @@
+import smtplib
+
 from testutils import EnseignerTestCase
 
 import enseigner.model as model
@@ -86,13 +88,14 @@ class ControllerTestCase(EnseignerTestCase):
         s1 = controller.create_session('28/12/2014 12:17', [])
         t1 = model.Tutor.create('foo', 'bar', 'baz', False)
         t2 = model.Tutor.create('foo2', 'bar2', 'baz', False)
-        self.assertEqual(controller.send_tutor_email(lambda x:'f', 'toto', 'titi $nom_tuteur'), [])
+        self.assertEqual(controller.send_tutor_email(s1, lambda x:'f', 'toto', 'titi $nom_tuteur'), [])
         self.assertEqual(set(emails.MockSender.queue), {
             ('foo', 'toto', 'titi bar'),
             ('foo2', 'toto', 'titi bar2')
             })
 
     def testSendTutorEmailError(self):
+        s1 = controller.create_session('28/12/2014 12:17', [])
         t1 = model.Tutor.create('foo', 'bar', 'baz', False)
         t2 = model.Tutor.create('foo2', 'bar2', 'baz', False)
         errored = set()
@@ -100,8 +103,10 @@ class ControllerTestCase(EnseignerTestCase):
         def fakesend(self, recipient, subject, content):
             errored.add((recipient, subject, content))
             emails.MockSender.send = original_send
+            raise smtplib.SMTPException()
         emails.MockSender.send = fakesend
-        self.assertEqual(controller.send_tutor_email(lambda x:'f', 'toto', 'titi $nom_tuteur'), [])
+        errors = controller.send_tutor_email(s1, lambda x:'f', 'toto', 'titi $nom_tuteur')
+        self.assertEqual(len(errors), 1, errors)
         self.assertTrue(errored)
         self.assertEqual(set(emails.MockSender.queue), {
             ('foo', 'toto', 'titi bar'),
