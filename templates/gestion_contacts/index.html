@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block navbar_gestioncontacts_selection %} class="active"{% endblock %}
+
+{% block body %}
+{% if request.args.confirmation_import %}
+    <div class="alert alert-success" role="alert">
+        Import réussi. {{ request.args.nb_imports }} nouveaux contacts et
+        {{ request.args.nb_ignores }} ignorés.
+    </div>
+{% endif %}
+<form action="{% if mode == 'tutors'%}{{ url_for('importer_tuteurs') }}{% else %}{{ url_for('importer_eleves') }}{% endif %}" method="get">
+    <button type="submit" class="btn btn-lg btn-default">Importer fichier</button>
+</form>
+<div style="clear: both"></div>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Actif-ive</th>
+            {% if mode == 'tutors' %}
+                <th>Respo soutien</th>
+            {% endif %}
+            {% if mode == 'students' %}
+                <th>Liste noire</th>
+            {% endif %}
+            <th>Nom</th>
+            <th>Adresse mail</th>
+            <th>Commentaire</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in rows %}
+            <tr>
+                <td>{% if row.active %}oui{% else %}non{% endif %}</td>
+                {% if mode == 'tutors' %}
+                    <td>{% if row.is_admin %}oui{% else %}non{% endif %}</td>
+                {% endif %}
+                {% if mode == 'students' %}
+                    <td>{% if row.blacklisted %}oui{% else %}non{% endif %}</td>
+                {% endif %}
+                <td>{{ row.name }}</td>
+                <td>{% if mode == 'tutors' %}{{ row.email }}{% else %}{{ row.emails }}{% endif %}</td>
+                <td>{{ row.comment }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+

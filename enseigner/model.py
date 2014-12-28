@@ -29,7 +29,8 @@ def password_hash(tutor_id, password):
 
 
 def get_conn(): # pragma: no cover
-    return sqlite3.connect('database.sqlite3')
+    conn = sqlite3.connect('database.sqlite3')
+    return conn
 
 def _model(nb_keys):
     class Model(object):
@@ -155,19 +156,20 @@ class Tutor(SingleKeyModel):
     _fields = ('uid', 'email', 'name', 'password_hash', 'phone_number', 'is_admin', 'is_active', 'comment')
 
     @classmethod
-    def create(cls, email, name, password, phone_number=None, is_admin=False, is_active=True, comment=None):
+    def create(cls, email, name, password=None, phone_number=None, is_admin=False, is_active=True, comment=None):
         t = cls._insert_one('''tutor_email, tutor_name, tutor_password_hash, tutor_phone_number,
                                tutor_is_admin, tutor_is_active, tutor_comment''',
                             (email, name, None, phone_number, is_admin, is_active, comment))
-        t.password_hash = password_hash(t.uid, password)
-        conn = get_conn()
-        c = conn.cursor()
-        try:
-            c.execute('''UPDATE tutors SET tutor_password_hash=?
-                         WHERE tutor_id=?''', (t.password_hash, t.uid))
-            conn.commit()
-        finally:
-            c.close()
+        if password:
+            t.password_hash = password_hash(t.uid, password)
+            conn = get_conn()
+            c = conn.cursor()
+            try:
+                c.execute('''UPDATE tutors SET tutor_password_hash=?
+                             WHERE tutor_id=?''', (t.password_hash, t.uid))
+                conn.commit()
+            finally:
+                c.close()
 
         return t
 

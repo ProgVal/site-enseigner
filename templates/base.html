@@ -28,8 +28,8 @@
             <ul class="nav navbar-nav">
                 <li {% block navbar_accueil_selection %}{% endblock %}><a href="{{ url_for('accueil') }}">Accueil</a></li>
                 <li {% block navbar_inscription_selection %}{% endblock %}><a href="{{ url_for('inscription') }}">Inscription</a></li>
-                <!--<li {% block navbar_prochainesseances_selection %}{% endblock %}><a href="{{ url_for('prochaines_seances') }}">Prochaines séances</a></li>-->
                 <li {% block navbar_gestionsoutien_selection %}{% endblock %}><a href="{{ url_for('gestion_soutien') }}">Gestion du soutien</a></li>
+                <li {% block navbar_gestioncontacts_selection %}{% endblock %}><a href="{{ url_for('gestion_contacts') }}">Gestion des contacts</a></li>
             </ul>
         </div>
     </div>

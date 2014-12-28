@@ -1,3 +1,4 @@
+import csv
 import string
 import smtplib
 import hashlib
@@ -142,3 +143,28 @@ def send_tutor_email(session, get_form_url, subject, content):
             mail.set_sent()
     session.set_emailed_tutors()
     return errors
+
+
+def read_contacts(fd):
+    people = list(csv.reader(fd, delimiter=','))
+    headers = people[0]
+    people = list(map(lambda x:dict(zip(headers, x)), people[1:]))
+    return people
+
+def import_tutors(fd):
+    raw = read_contacts(fd)
+    nb_imported = 0
+    nb_ignored = 0
+    for row in raw:
+        email = row['E-mail Address'].decode('latin1')
+        name = '%s %s' % (row['First Name'], row['Last Name'])
+        name = name.decode('latin1')
+        try:
+            model.Tutor.get(email)
+        except model.NotFound:
+            model.Tutor.create(email, name)
+            nb_imported += 1
+        else:
+            nb_ignored += 1
+            continue
+    return (nb_imported, nb_ignored)

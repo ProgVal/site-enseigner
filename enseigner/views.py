@@ -249,3 +249,25 @@ def formulaire_tuteur():
             form=form,
             success=success,
             session_subjects=sorted(session_subjects, key=lambda x:x.name))
+
+@app.route('/gestion_contacts/')
+def gestion_contacts():
+    return redirect(url_for('gestion_tuteurs'))
+
+@app.route('/gestion_contacts/tuteurs/')
+def gestion_tuteurs():
+    return render_template('gestion_contacts/index.html',
+            mode='tutors',
+            rows=model.Tutor.all_active())
+
+@app.route('/gestion_contacts/tuteurs/import/', methods=['GET', 'POST'])
+def importer_tuteurs():
+    if request.method == 'GET':
+        return render_template('gestion_contacts/import.html')
+    else:
+        (nb_imported, nb_ignored) = \
+                controller.import_tutors(request.files['file'].stream)
+        return redirect(url_for('gestion_tuteurs',
+            confirmation_import=1,
+            nb_imports=nb_imported,
+            nb_ignores=nb_ignored))
