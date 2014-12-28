@@ -120,6 +120,33 @@ class TregTestCase(EnseignerTestCase):
                 {x.sid for x in model.TutorRegistrationSubject.all_of_treg(tr1)},
                 {sub1.sid})
 
+class SessionTestCase(EnseignerTestCase):
+    def testEmailed(self):
+        s1 = model.Session.create('foo', 'bar')
+        s2 = model.Session.create('foo2', 'bar2')
+        self.assertFalse(s1.emailed_tutors)
+        self.assertFalse(s1.emailed_students)
+        self.assertFalse(s2.emailed_tutors)
+        self.assertFalse(s2.emailed_students)
+        s1.set_emailed_tutors()
+        self.assertTrue(s1.emailed_tutors)
+        self.assertFalse(s1.emailed_students)
+        self.assertFalse(s2.emailed_tutors)
+        self.assertFalse(s2.emailed_students)
+        del model.Session._instances[s1.sid]
+        s1b = model.Session.get(s1.sid)
+        self.assertTrue(s1.emailed_tutors)
+        self.assertFalse(s1.emailed_students)
+        s1.set_emailed_students()
+        self.assertTrue(s1.emailed_tutors)
+        self.assertTrue(s1.emailed_students)
+        self.assertFalse(s2.emailed_tutors)
+        self.assertFalse(s2.emailed_students)
+        del model.Session._instances[s1.sid]
+        s1b = model.Session.get(s1.sid)
+        self.assertTrue(s1.emailed_tutors)
+        self.assertTrue(s1.emailed_students)
+
 class SregTestCase(EnseignerTestCase):
     def testGetFindAll(self):
         s1 = model.Session.create('foo', 'bar')

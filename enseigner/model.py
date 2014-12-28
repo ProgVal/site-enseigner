@@ -354,6 +354,24 @@ class Session(SingleKeyModel):
             c.close()
         return r
 
+    def set_emailed_tutors(self):
+        conn = get_conn()
+        conn.execute('''UPDATE sessions SET
+                        session_emailed_tutors=1
+                        WHERE session_id=?''',
+                     (self.sid,))
+        conn.commit()
+        self.emailed_tutors = 1
+
+    def set_emailed_students(self):
+        conn = get_conn()
+        conn.execute('''UPDATE sessions SET
+                        session_emailed_students=1
+                        WHERE session_id=?''',
+                     (self.sid,))
+        conn.commit()
+        self.emailed_students = 1
+
 
 @register
 class TutorRegistration(SingleKeyModel):
