@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import os
+import sys
 import uuid
 import odswriter
 import collections
@@ -15,6 +16,8 @@ import controller
 from config import config
 
 app = Flask('enseigner')
+app.config['PROPAGATE_EXCEPTIONS'] = True
+app.root_path = os.path.join(os.path.dirname(__file__), '..')
 salt = config['password_salt']
 assert len(salt) >= 20, 'Secret key is not long enough'
 app.secret_key = salt
