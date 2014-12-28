@@ -47,8 +47,8 @@ def get_tutor_form_data(session, tutor):
     tutor = model.Tutor.get(int(tutor))
     try:
         treg = model.TutorRegistration.find(int(session), tutor)
-        subjects = (model.Subject.get(x.sid)
-                    for x in model.TutorRegistrationSubject.all_of_treg(treg))
+        subjects = {model.Subject.get(x.sid)
+                    for x in model.TutorRegistrationSubject.all_of_treg(treg)}
         group_size = treg.group_size
         comment = treg.comment
     except model.NotFound:

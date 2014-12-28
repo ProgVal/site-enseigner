@@ -193,6 +193,22 @@ def connexion():
     else:
         raise AssertionError(request.method)
 
-@app.route('/formulaires/tuteur/')
+@app.route('/formulaires/tuteur/', methods=['GET', 'POST'])
 def formulaire_tuteur():
-    pass
+    session = model.Session.get(int(request.args['session']))
+    tutor = model.Tutor.get(int(request.args['tuteur']))
+    key = request.args['key']
+    if request.method == 'POST':
+        subjects = request.form.getlist('subjects')
+        controller.set_tutor_form_data(session.sid, tutor.uid, key,
+                subjects,
+                request.form['group_size'], request.form['comment'])
+        success = True 
+    else:
+        success = False
+    form = controller.get_tutor_form_data(session.sid, tutor.uid, key)
+    session_subjects = model.SessionSubject.all_subjects_for_session(session)
+    return render_template('formulaires/tuteur.html',
+            form=form,
+            success=success,
+            session_subjects=sorted(session_subjects, key=lambda x:x.name))
