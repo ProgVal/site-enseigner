@@ -1,7 +1,9 @@
 # -*- coding: utf8 -*-
 import os
 import uuid
+import odswriter
 import collections
+from cStringIO import StringIO
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask import abort, Response
 from werkzeug.exceptions import HTTPException
@@ -101,15 +103,20 @@ def liste_tuteurs_seance():
 
     if request.args.get('download', 'false') == 'true':
         def pred(row):
-            return '%s;%s;%s;%s;%s' % (
+            return (
                     row.tutor.name,
                     row.tutor.email,
                     ', '.join(x.name for x in row.subjects1),
                     ', '.join(x.name for x in row.subjects2),
                     row.comment)
-        response = Response('\n'.join(map(pred, rows)),
-                mimetype='text/csv')
-        response.headers["Content-Disposition"] = "attachment; filename=Tuteurs_seance.csv"
+        io = StringIO()
+        with odswriter.writer(io) as odsfile:
+            for row in rows:
+                odsfile.writerow(pred(row))
+        io.seek(0)
+        response = Response(io,
+                mimetype='application/vnd.oasis.opendocument.spreadsheet')
+        response.headers["Content-Disposition"] = "attachment; filename=Tuteurs_seance.ods"
         return response
     else:
         return render_template('gestion_soutien/liste_tuteurs_seance.html',
