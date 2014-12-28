@@ -56,3 +56,6 @@ target/
 # vim
 .*.swp
 *~
+
+# config
+config.json
