@@ -128,16 +128,20 @@ def envoi_mail_tuteurs():
     if request.method == 'POST' and not invalid:
         subject = request.form['subject']
         content = request.form['content']
-        form_url = url_for('formulaire_tuteur', _external=True,
-                session=session.sid,
-                tuteur=tutor.uid,
-                key=hash_subscription_params(session.sid, 'tutor', tutor.uid)
-                )
-        errors = controller.send_tutor_email(form_url, subject, content)
+        def get_form_url(tutor):
+            key = controller.hash_subscription_params(session.sid, 'tutor', tutor.uid)
+            return url_for('formulaire_tuteur', _external=True,
+                    session=session.sid,
+                    tuteur=tutor.uid,
+                    key=key
+                    )
+        errors = controller.send_tutor_email(get_form_url, subject, content)
         if not errors:
-            return
-    else:
+            return redirect(url_for('gestion_soutien'))
+    elif request.method == 'POST':
         errors = ['Un ou des champs est/sont invalide-s']
+    else:
+        errors = []
 
     subj_repl = {'date': session.date.strftime('%d/%m/%Y')}
     subject = request.form.get('subject', '') or \
@@ -188,3 +192,7 @@ def connexion():
             return redirect('/' + redirect_url)
     else:
         raise AssertionError(request.method)
+
+@app.route('/formulaires/tuteur/')
+def formulaire_tuteur():
+    pass

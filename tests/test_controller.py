@@ -86,7 +86,7 @@ class ControllerTestCase(EnseignerTestCase):
         s1 = controller.create_session('28/12/2014 12:17', [])
         t1 = model.Tutor.create('foo', 'bar', 'baz', False)
         t2 = model.Tutor.create('foo2', 'bar2', 'baz', False)
-        self.assertEqual(controller.send_tutor_email(s1, 'toto', 'titi $nom_tuteur'), [])
+        self.assertEqual(controller.send_tutor_email(lambda x:'f', 'toto', 'titi $nom_tuteur'), [])
         self.assertEqual(set(emails.MockSender.queue), {
             ('foo', 'toto', 'titi bar'),
             ('foo2', 'toto', 'titi bar2')
@@ -101,7 +101,7 @@ class ControllerTestCase(EnseignerTestCase):
             errored.add((recipient, subject, content))
             emails.MockSender.send = original_send
         emails.MockSender.send = fakesend
-        self.assertEqual(controller.send_tutor_email('f', 'toto', 'titi $nom_tuteur'), [])
+        self.assertEqual(controller.send_tutor_email(lambda x:'f', 'toto', 'titi $nom_tuteur'), [])
         self.assertTrue(errored)
         self.assertEqual(set(emails.MockSender.queue), {
             ('foo', 'toto', 'titi bar'),

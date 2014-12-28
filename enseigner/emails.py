@@ -1,3 +1,4 @@
+import smtplib
 import collections
 from email.mime.text import MIMEText
 
@@ -14,7 +15,7 @@ class Sender(object):
         self.server.quit()
 
     def send(self, recipient, subject, content):
-        msg = MIMEText(content)
+        msg = MIMEText(content, _charset='utf8')
         msg['Subject'] = subject
         msg['From'] = config['email']['from']
         msg['To'] = recipient

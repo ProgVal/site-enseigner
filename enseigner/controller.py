@@ -19,7 +19,7 @@ def hash_subscription_params(session_id, type_, user_id):
     salt = config['secret_key']
     assert len(salt) >= 20, 'Secret is not long enough'
     assert type_ in ('tutor', 'student'), type_
-    return hashlib.sha512('%s|%s|%s|%s' % (salt, type_, session_id, user_id))\
+    return hashlib.sha256('%s|%s|%s|%s' % (salt, type_, session_id, user_id))\
             .hexdigest()
 def check_hash(type_):
     def decorator(f):
@@ -100,11 +100,11 @@ def set_student_form_data(session, student, subject, friends, comment):
         sreg.update(subject, friends, comment)
     return sreg
 
-def send_tutor_email(form_url, subject, content):
+def send_tutor_email(get_form_url, subject, content):
     tutors = model.Tutor.all_active()
     def pred(tutor):
         repl = {'nom_tuteur': tutor.name,
-                'lien_formulaire_tuteur': form_url
+                'lien_formulaire_tuteur': get_form_url(tutor)
                 }
         return (tutor.email,
                 string.Template(subject).substitute(repl),
