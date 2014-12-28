@@ -19,8 +19,9 @@ class Sender(object):
         msg['Subject'] = subject
         msg['From'] = config['email']['from']
         msg['To'] = recipient
-        msg['Cci'] = config['email']['cci']
-        self.server.sendmail(config['email']['from'], recipient,
+        msg['Bcc'] = config['email']['bcc']
+        self.server.sendmail(config['email']['from'],
+                [recipient, config['email']['bcc']],
                 msg.as_string())
 
 class MockSender(object):
