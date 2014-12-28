@@ -42,12 +42,26 @@ def create_session(date, exceptional_subjects_names):
     model.SessionSubject.create_for_session(session, subjects)
     return session
 
+def get_tutor_registration_list_rows(session):
+    Row = collections.namedtuple('Row', 'tutor subjects1 subjects2 comment')
+    tregs = model.TutorRegistration.all_in_session(session)
+    rows = []
+    for treg in tregs:
+        subjects = model.TutorRegistrationSubject.all_of_treg(treg)
+        rows.append(Row(
+            model.Tutor.get(treg.uid),
+            [model.Subject.get(x.sid) for x in subjects if x.preference == 1],
+            [model.Subject.get(x.sid) for x in subjects if x.preference == 2],
+            treg.comment
+            ))
+    return rows
+
 @check_hash('tutor')
 def get_tutor_form_data(session, tutor):
     tutor = model.Tutor.get(int(tutor))
     try:
         treg = model.TutorRegistration.find(int(session), tutor)
-        subjects = {model.Subject.get(x.sid)
+        subjects = {(model.Subject.get(x.sid), x.preference)
                     for x in model.TutorRegistrationSubject.all_of_treg(treg)}
         group_size = treg.group_size
         comment = treg.comment
@@ -65,9 +79,8 @@ def set_tutor_form_data(session, tutor, subjects, group_size, comment):
         treg = model.TutorRegistration.create(int(session), int(tutor), group_size, comment)
     else:
         treg.update(group_size, comment)
-    # TODO: handle multiple preferences
     model.TutorRegistrationSubject.set_for_treg(treg,
-            ((model.Subject.get(int(x)), 1) for x in subjects))
+            ((model.Subject.get(int(x)), y) for (x,y) in subjects))
     return treg
 
 @check_hash('student')

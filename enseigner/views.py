@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import os
 import uuid
+import collections
 from flask import Flask, render_template, request, session, redirect, url_for
 from flask import abort
 from werkzeug.exceptions import HTTPException
@@ -91,6 +92,16 @@ def prochaines_seances():
 def gestion_soutien():
     return render_template('gestion_soutien/index.html',
             sessions=model.Session.all())
+
+@app.route('/gestion_soutien/liste_tuteurs_seance/')
+@require_admin
+def liste_tuteurs_seance():
+    session = model.Session.get(int(request.args['session']))
+    rows = controller.get_tutor_registration_list_rows(session)
+
+    return render_template('gestion_soutien/liste_tuteurs_seance.html',
+            session=session,
+            rows=rows)
 
 @app.route('/gestion_soutien/nouvelle/', methods=['GET', 'POST'])
 @require_admin
@@ -199,7 +210,8 @@ def formulaire_tuteur():
     tutor = model.Tutor.get(int(request.args['tuteur']))
     key = request.args['key']
     if request.method == 'POST':
-        subjects = request.form.getlist('subjects')
+        subjects = [(x, 1) for x in request.form.getlist('subjects1')]
+        subjects.extend([(x, 2) for x in request.form.getlist('subjects2')])
         controller.set_tutor_form_data(session.sid, tutor.uid, key,
                 subjects,
                 request.form['group_size'], request.form['comment'])
