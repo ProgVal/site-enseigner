@@ -29,7 +29,7 @@ def password_hash(tutor_id, password):
 
 
 def get_conn(): # pragma: no cover
-    conn = sqlite3.connect('database.sqlite3')
+    conn = sqlite3.connect(config['database'])
     return conn
 
 def _model(nb_keys):

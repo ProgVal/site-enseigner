@@ -3,6 +3,7 @@
         "tutors": "tutors_backup.csv",
         "students": "students_backup.csv"
     },
+    "database": "database.sqlite3",
     "password_salt": "ffffffffffffffffffffffffffffffffffff",
     "secret_key": "ooooooooooooooooooooooooooooooooo",
     "email": {
