@@ -230,6 +230,7 @@ def connexion():
         raise AssertionError(request.method)
 
 @app.route('/formulaires/tuteur/', methods=['GET', 'POST'])
+@require_admin
 def formulaire_tuteur():
     session = model.Session.get(int(request.args['session']))
     tutor = model.Tutor.get(int(request.args['tuteur']))
@@ -251,16 +252,19 @@ def formulaire_tuteur():
             session_subjects=sorted(session_subjects, key=lambda x:x.name))
 
 @app.route('/gestion_contacts/')
+@require_admin
 def gestion_contacts():
     return redirect(url_for('gestion_tuteurs'))
 
 @app.route('/gestion_contacts/tuteurs/')
+@require_admin
 def gestion_tuteurs():
     return render_template('gestion_contacts/index.html',
             mode='tutors',
             rows=model.Tutor.all_active())
 
 @app.route('/gestion_contacts/tuteurs/import/', methods=['GET', 'POST'])
+@require_admin
 def importer_tuteurs():
     if request.method == 'GET':
         return render_template('gestion_contacts/import.html')
