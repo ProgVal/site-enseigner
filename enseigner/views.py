@@ -230,7 +230,6 @@ def connexion():
         raise AssertionError(request.method)
 
 @app.route('/formulaires/tuteur/', methods=['GET', 'POST'])
-@require_admin
 def formulaire_tuteur():
     session = model.Session.get(int(request.args['session']))
     tutor = model.Tutor.get(int(request.args['tuteur']))
